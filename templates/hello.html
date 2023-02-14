@@ -1,5 +1,5 @@
+<!DOCTYPE html>
 <!-- author ben lawson (balawson@bu.edu) -->
-<!doctype html>
 {% if message %}
   <h4>{{message}}!</h4>
 {% endif %}
@@ -20,13 +20,13 @@
 {% endif %}
 
 {% if message is none %}
-  <p>You should <a href='/login'>login!</a></p>
+  <p>You should <a href="/login">login!</a></p>
 {% else %}
-  <p> Go to <a href='/profile'>profile?</a></p>
+  <p> Go to <a href="/profile">profile?</a></p>
 {% endif %}
 
 <ul>
-<li><a href='/upload'>Upload a photo</a> </li>
-<li><a href='/logout'>Logout</a></li>
-<li><a href='/'>Home</a></li>
+<li><a href="/upload">Upload a photo</a> </li>
+<li><a href="/logout">Logout</a></li>
+<li><a href="/">Home</a></li>
 </ul>
