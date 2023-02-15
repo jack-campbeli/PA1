@@ -177,7 +177,7 @@ def getUsersPhotos(uid):
     cursor = conn.cursor()
     cursor.execute(
         "SELECT imgdata, picture_id, caption FROM Pictures WHERE user_id = '{0}'".format(uid))
-    # NOTE return a list of tuples, [(imgdata, pid, caption), ...]
+    # return a list of tuples, [(imgdata, pid, caption), ...]
     return cursor.fetchall()
 
 
@@ -227,14 +227,28 @@ def upload_file():
             '''INSERT INTO Pictures (imgdata, user_id, caption) VALUES (%s, %s, %s)''', (photo_data, uid, caption))
         conn.commit()
         return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid), base64=base64)
-    # The method is GET so we return a  HTML form to upload the a photo.
+    # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('upload.html')
 # end photo uploading code
 
+# start photo deleting code
+@app.route('/delete', methods=['GET', 'POST'])
+@flask_login.login_required
+def delete_photo():
+    if request.method == 'POST':
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+        picture_id = request.form.get('picture_id')
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM Pictures WHERE picture_id = '{0}'".format(picture_id))
+        conn.commit()
+        return render_template('hello.html', name=flask_login.current_user.id, message='Photo deleted!', photos=getUsersPhotos(uid), base64=base64)
+    else:
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+        return render_template('hello.html', message="Delete photos here!", delete=True, photos=getUsersPhotos(uid), base64=base64)
+
 # default page
-
-
 @app.route("/", methods=['GET'])
 def hello():
     return render_template('hello.html', message='Welcome to Photoshare')

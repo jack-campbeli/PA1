@@ -26,7 +26,7 @@ CREATE TABLE Users (
 CREATE TABLE Pictures (
 --     album_id int4 NOT NULL,
     
-	picture_id int4  AUTO_INCREMENT,
+	picture_id int4 AUTO_INCREMENT,
 	user_id int4,
 	imgdata longblob,
 	caption VARCHAR(255),
