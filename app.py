@@ -24,7 +24,7 @@ app.secret_key = 'super secret string'  # Change this!
 
 # These will need to be changed according to your creditionals
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'cs460cs460'
+app.config['MYSQL_DATABASE_PASSWORD'] = '123'
 app.config['MYSQL_DATABASE_DB'] = 'photoshare'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
@@ -44,8 +44,10 @@ def getUserList():
     cursor.execute("SELECT email from Users")
     return cursor.fetchall()
 
+
 class User(flask_login.UserMixin):
     pass
+
 
 @login_manager.user_loader
 def user_loader(email):
@@ -55,6 +57,7 @@ def user_loader(email):
     user = User()
     user.id = email
     return user
+
 
 @login_manager.request_loader
 def request_loader(request):
@@ -72,12 +75,14 @@ def request_loader(request):
     user.is_authenticated = request.form['password'] == pwd
     return user
 
+
 '''
 A new page looks like this:
 @app.route('new_page_name')
 def new_page_function():
 	return new_page_html
 '''
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -108,10 +113,12 @@ def login():
     return "<a href='/login'>Try again</a>\
 			</br><a href='/register'>or make an account</a>"
 
+
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
     return render_template('hello.html', message='Logged out')
+
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
@@ -119,18 +126,22 @@ def unauthorized_handler():
 
 # you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
 
+
 @app.route("/register", methods=['GET'])
 def register():
     return render_template('register.html', supress='True')
+
 
 @app.route("/register", methods=['POST'])
 def register_user():
     try:
         email = request.form.get('email')
+        password = request.form.get('password')
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         dob = request.form.get('dob')
-        password = request.form.get('password')
+        hometown = request.form.get('hometown')
+        gender = request.form.get('gender')
     except:
         # this prints to shell, end users will not see this (all print statements go to shell)
         print("couldn't find all tokens")
@@ -155,6 +166,7 @@ def register_user():
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('register'))
 
+
 def getUsersPhotos(uid):
     cursor = conn.cursor()
     cursor.execute(
@@ -162,11 +174,13 @@ def getUsersPhotos(uid):
     # NOTE return a list of tuples, [(imgdata, pid, caption), ...]
     return cursor.fetchall()
 
+
 def getUserIdFromEmail(email):
     cursor = conn.cursor()
     cursor.execute(
         "SELECT user_id FROM Users WHERE email = '{0}'".format(email))
     return cursor.fetchone()[0]
+
 
 def isEmailUnique(email):
     # use this to check if a email has already been registered
@@ -178,17 +192,21 @@ def isEmailUnique(email):
         return True
 # end login code
 
+
 @app.route('/profile')
 @flask_login.login_required
 def protected():
     return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
 
+
 # begin photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
 
 @app.route('/upload', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -200,7 +218,7 @@ def upload_file():
         photo_data = imgfile.read()
         cursor = conn.cursor()
         cursor.execute(
-            '''INSERT INTO Pictures (imgdata, user_id, caption) VALUES (%s, %s, %s )''', (photo_data, uid, caption))
+            '''INSERT INTO Pictures (imgdata, user_id, caption) VALUES (%s, %s, %s)''', (photo_data, uid, caption))
         conn.commit()
         return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid), base64=base64)
     # The method is GET so we return a  HTML form to upload the a photo.
@@ -209,9 +227,12 @@ def upload_file():
 # end photo uploading code
 
 # default page
+
+
 @app.route("/", methods=['GET'])
 def hello():
     return render_template('hello.html', message='Welcome to Photoshare')
+
 
 if __name__ == "__main__":
     # this is invoked when in the shell you run
