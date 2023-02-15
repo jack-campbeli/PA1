@@ -1,13 +1,13 @@
 CREATE DATABASE IF NOT EXISTS photoshare;
 USE photoshare;
 DROP TABLE IF EXISTS Friend CASCADE;
-DROP TABLE IF EXISTS User CASCADE;
--- DROP TABLE IF EXISTS Photo CASCADE;
--- DROP TABLE IF EXISTS Album CASCADE;
--- DROP TABLE IF EXISTS Tag CASCADE;
--- DROP TABLE IF EXISTS Comment CASCADE;
+DROP TABLE IF EXISTS Users CASCADE;
+DROP TABLE IF EXISTS Comment CASCADE;
+DROP TABLE IF EXISTS Tag CASCADE;
+DROP TABLE IF EXISTS Photo CASCADE;
+DROP TABLE IF EXISTS Album CASCADE;
 
-CREATE TABLE User (
+CREATE TABLE Users (
 	user_id int AUTO_INCREMENT,
 	first_name VARCHAR(50) NOT NULL,
 	last_name VARCHAR(50) NOT NULL,
@@ -28,8 +28,8 @@ CREATE TABLE Friend (
   friend_id INT NOT NULL,
 
   PRIMARY KEY (user_id, friend_id),
-  FOREIGN KEY (user_id) REFERENCES User(user_id),
-  FOREIGN KEY (friend_id) REFERENCES User(user_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id),
+  FOREIGN KEY (friend_id) REFERENCES Users(user_id),
   CHECK (user_id <> friend_id)
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE Album (
 	creation_date VARCHAR(255) NOT NULL,
     
 	CONSTRAINT album_pk PRIMARY KEY (album_id),
-	FOREIGN KEY (user_id) REFERENCES User (user_id)
+	FOREIGN KEY (user_id) REFERENCES Users (user_id)
 );
 
 CREATE TABLE Photo (
@@ -52,7 +52,7 @@ CREATE TABLE Photo (
 
 	CONSTRAINT photo_pk PRIMARY KEY (photo_id),
 	FOREIGN KEY (user_id) 
-		REFERENCES User (user_id) 
+		REFERENCES Users (user_id) 
 		ON DELETE CASCADE,
 	FOREIGN KEY (album_id) 	
 		REFERENCES Album (album_id)
@@ -75,5 +75,5 @@ CREATE TABLE Comment (
     
 	CONSTRAINT comment_pk PRIMARY KEY (comment_id),
 	FOREIGN KEY (photo_id) REFERENCES Photo (photo_id),
-	FOREIGN KEY (user_id) REFERENCES User (user_id)
+	FOREIGN KEY (user_id) REFERENCES Users (user_id)
 );
