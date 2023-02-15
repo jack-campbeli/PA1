@@ -131,6 +131,12 @@ def unauthorized_handler():
 def register():
     return render_template('register.html', supress='True')
 
+@app.route("/photos", methods=['GET'])
+@flask_login.login_required
+def pictures():
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    return render_template('hello.html', message='These are your photos', photos=getUsersPhotos(uid), base64=base64)
+
 
 @app.route("/register", methods=['POST'])
 def register_user():
