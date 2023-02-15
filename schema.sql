@@ -1,11 +1,11 @@
 CREATE DATABASE IF NOT EXISTS photoshare;
 USE photoshare;
-DROP TABLE IF EXISTS User CASCADE;
 DROP TABLE IF EXISTS Friend CASCADE;
-DROP TABLE IF EXISTS Photo CASCADE;
-DROP TABLE IF EXISTS Album CASCADE;
-DROP TABLE IF EXISTS Tag CASCADE;
-DROP TABLE IF EXISTS Comment CASCADE;
+DROP TABLE IF EXISTS User CASCADE;
+-- DROP TABLE IF EXISTS Photo CASCADE;
+-- DROP TABLE IF EXISTS Album CASCADE;
+-- DROP TABLE IF EXISTS Tag CASCADE;
+-- DROP TABLE IF EXISTS Comment CASCADE;
 
 CREATE TABLE User (
 	user_id int AUTO_INCREMENT,
@@ -28,24 +28,9 @@ CREATE TABLE Friend (
   friend_id INT NOT NULL,
 
   PRIMARY KEY (user_id, friend_id),
-  FOREIGN KEY (user_id) REFERENCES Users(user_id),
-  FOREIGN KEY (friend_id) REFERENCES Users(user_id),
+  FOREIGN KEY (user_id) REFERENCES User(user_id),
+  FOREIGN KEY (friend_id) REFERENCES User(user_id),
   CHECK (user_id <> friend_id)
-);
-
-CREATE TABLE Photo (
-	photo_id INT AUTO_INCREMENT,
-	album_id INT NOT NULL,
-	user_id INT NOT NULL,
-	data longblob NOT NULL,
-	caption VARCHAR(255),
-
-	CONSTRAINT photo_pk PRIMARY KEY (photo_id),
-	FOREIGN KEY (user_id) 
-REFERENCES User (user_id) 
-ON DELETE CASCADE,
-	FOREIGN KEY (album_id) 	
-REFERENCES Album (album_id)
 );
 
 CREATE TABLE Album (
@@ -58,14 +43,27 @@ CREATE TABLE Album (
 	FOREIGN KEY (user_id) REFERENCES User (user_id)
 );
 
+CREATE TABLE Photo (
+	photo_id INT AUTO_INCREMENT,
+	album_id INT NOT NULL,
+	user_id INT NOT NULL,
+	data longblob NOT NULL,
+	caption VARCHAR(255),
+
+	CONSTRAINT photo_pk PRIMARY KEY (photo_id),
+	FOREIGN KEY (user_id) 
+		REFERENCES User (user_id) 
+		ON DELETE CASCADE,
+	FOREIGN KEY (album_id) 	
+		REFERENCES Album (album_id)
+);
+
 CREATE TABLE Tag (
 	tag_name VARCHAR(255) UNIQUE,
 	photo_id INT,
     
 	CONSTRAINT tag_pk PRIMARY KEY (tag_name, photo_id),
-	FOREIGN KEY (photo_id) 
-REFERENCES Photos (photo_id) 
-ON DELETE CASCADE
+	FOREIGN KEY (photo_id) REFERENCES Photo (photo_id) ON DELETE CASCADE
 );
 
 CREATE TABLE Comment (
@@ -76,6 +74,6 @@ CREATE TABLE Comment (
 	text longtext NOT NULL,
     
 	CONSTRAINT comment_pk PRIMARY KEY (comment_id),
-	FOREIGN KEY (photo_id) REFERENCES Photos (photo_id),
+	FOREIGN KEY (photo_id) REFERENCES Photo (photo_id),
 	FOREIGN KEY (user_id) REFERENCES User (user_id)
 );
