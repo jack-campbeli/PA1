@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<title>Friends</title>
 <!-- 
 Page for adding friends and viewing friends list 
 
@@ -5,3 +7,22 @@ TO-DO:
     - List all added friends with a button to remove them
     - List all unadded friends with a button to add them
 -->
+<h1> Friends </h1>
+
+<li><a href="/">Home</a></li>
+<br>
+
+<label for="dob">Add friend ID:</label>
+<input type="friend" name="friend"/><br/>
+<input type="submit"/>
+
+<h3> Your Friends </h3>
+{% if friends %}
+    <ul>
+    {% for friend in friends %}
+
+        <li>ID: {{friend[1]}}<br>
+
+    {% endfor %}
+    </ul>
+{% endif %}

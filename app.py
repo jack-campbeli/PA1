@@ -131,6 +131,7 @@ def unauthorized_handler():
 def register():
     return render_template('register.html', supress='True')
 
+
 @app.route("/photos", methods=['GET'])
 @flask_login.login_required
 def pictures():
@@ -206,6 +207,24 @@ def isEmailUnique(email):
 def protected():
     return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
 
+@app.route("/friends", methods=['GET', 'POST'])
+@flask_login.login_required
+def loadFriend():
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    list = getUsersFriends(uid)
+
+    if (list == []):
+        return render_template('friends.html', name=flask_login.current_user.id)
+    else:
+        return render_template('friends.html', name=flask_login.current_user.id, friends=list)
+
+
+def getUsersFriends(uid):
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM Friend WHERE user_id = '{0}'".format(uid))
+    return cursor.fetchall()
+
 
 # begin photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
@@ -235,6 +254,8 @@ def upload_file():
 # end photo uploading code
 
 # start photo deleting code
+
+
 @app.route('/delete', methods=['GET', 'POST'])
 @flask_login.login_required
 def delete_photo():
@@ -251,6 +272,8 @@ def delete_photo():
         return render_template('hello.html', message="Delete photos here!", delete=True, photos=getUsersPhotos(uid), base64=base64)
 
 # default page
+
+
 @app.route("/", methods=['GET'])
 def hello():
     return render_template('hello.html', message='Welcome to Photoshare')

@@ -16,22 +16,22 @@ CREATE TABLE Users (
 	dob DATE NOT NULL,
 	hometown VARCHAR(100),
 	gender VARCHAR(50),
-	contribution_score int4,
+	contribution_score int4 DEFAULT 0,
 
 	CONSTRAINT user_pk PRIMARY KEY (user_id),
 	CHECK (gender = 'female' OR gender = 'male' OR gender = 'n/a'),
-	CHECK (contribution_score > 0)
+	CHECK (contribution_score >= 0)
 );
 
-CREATE TABLE Pictures (
+CREATE TABLE Photo (
 --     album_id int4 NOT NULL,
     
-	picture_id int4 AUTO_INCREMENT,
+	photo_id int4 AUTO_INCREMENT,
 	user_id int4,
 	imgdata longblob,
 	caption VARCHAR(255),
 	INDEX upid_idx (user_id),
-	CONSTRAINT pictures_pk PRIMARY KEY (picture_id)
+	CONSTRAINT photo_pk PRIMARY KEY (photo_id)
 
 -- 	FOREIGN KEY (user_id) 
 -- 		REFERENCES Users (user_id) 
