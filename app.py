@@ -151,7 +151,7 @@ def register_user():
     test = isEmailUnique(email)
     if test:
         print(cursor.execute(
-            "INSERT INTO Users (first_name, last_name, dob, email, password) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(first_name, last_name, dob, email, password)))
+            "INSERT INTO Users (first_name, last_name, dob, email, password, hometown, gender) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(first_name, last_name, dob, email, password, hometown, gender)))
         conn.commit()
 
         # log user in
@@ -160,6 +160,8 @@ def register_user():
         user.first_name = first_name
         user.last_name = last_name
         user.dob = dob
+        user.hometown = hometown
+        user.gender = gender
         flask_login.login_user(user)
         return render_template('hello.html', name=email, message='Account Created!')
     else:
