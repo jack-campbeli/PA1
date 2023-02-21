@@ -41,8 +41,8 @@ CREATE TABLE Photo (
 );
 
 CREATE TABLE Friend (
-  user_id INT NOT NULL,
-  friend_id INT NOT NULL,
+  user_id int NOT NULL,
+  friend_id int NOT NULL,
 
   PRIMARY KEY (user_id, friend_id),
   FOREIGN KEY (user_id) REFERENCES Users(user_id),

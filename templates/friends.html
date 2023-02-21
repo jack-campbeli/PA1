@@ -12,9 +12,12 @@ TO-DO:
 <li><a href="/">Home</a></li>
 <br>
 
-<label for="dob">Add friend ID:</label>
-<input type="friend" name="friend"/><br/>
-<input type="submit"/>
+<form method="post" action="{{ url_for('add_friend') }}">
+    <label for="friend_id">Enter your friend ID:</label>
+    <input type="friend_id" name="friend_id" /><br />
+    
+    <input type="submit"/>
+</form>
 
 <h3> Your Friends </h3>
 {% if friends %}

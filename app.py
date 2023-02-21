@@ -207,7 +207,32 @@ def isEmailUnique(email):
 def protected():
     return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
 
-@app.route("/friends", methods=['GET', 'POST'])
+
+@app.route("/friends", methods=['POST'])
+@flask_login.login_required
+def add_friend():
+    try:
+        friend_id = request.form.get('friend_id')
+    except:
+        print("couldn't find all tokens")
+        return flask.redirect(flask.url_for('friends'))
+
+    cursor = conn.cursor()
+
+    #### TESTING: for now assume id is correct
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    if 1:
+        print(cursor.execute(
+            "INSERT INTO Friend (user_id, friend_id) VALUES ('{0}', '{1}')".format(uid, friend_id)))
+        conn.commit()
+
+        return render_template('friends.html', name=flask_login.current_user.id, friends=getUsersFriends(uid))
+    else:
+        print("couldn't find all tokens")
+        return flask.redirect(flask.url_for('friends'))
+
+
+@app.route("/friends", methods=['GET'])
 @flask_login.login_required
 def loadFriend():
     uid = getUserIdFromEmail(flask_login.current_user.id)
