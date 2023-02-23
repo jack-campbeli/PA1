@@ -26,6 +26,7 @@
 <h2>Here are everyones photos</h2>
     <ul>
     {% for photo in allphotos %}
+        <li>User: {{photo[1]}}<br>
         <li>Caption: {{photo[2]}}<br>
         <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
     {% endfor %}

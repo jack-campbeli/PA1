@@ -170,12 +170,6 @@ def getUsersPhotos(uid):
     # return a list of tuples, [(imgdata, pid, caption), ...]
     return cursor.fetchall()
 
-def getAllPhotos():
-    cursor = conn.cursor()
-    cursor.execute("SELECT imgdata, user_id, caption FROM Photo") 
-    # return a list of tuples, [(imgdata, pid, caption), ...]
-    return cursor.fetchall()
-
 def getUserIdFromEmail(email):
     cursor = conn.cursor()
     cursor.execute(
@@ -291,10 +285,21 @@ def delete_file():
         return render_template('delete.html')
 # END photo deleting code
 
-# browsing page
+# START browsing page code
+def getAllPhotos():
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT imgdata, first_name, caption \n" 
+        "FROM Photo \n"  
+        "INNER JOIN Users \n" 
+        "ON Photo.user_id = Users.user_id;")
+    # return a list of tuples, [(imgdata, first_name, caption), ...]
+    return cursor.fetchall()
+
 @app.route("/browse", methods=['GET'])
 def browse():
     return render_template('hello.html', message='Welcome to Photoshare', allphotos=getAllPhotos(), base64=base64)
+# END browsing page code
 
 # default page
 @app.route("/", methods=['GET'])
