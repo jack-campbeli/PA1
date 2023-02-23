@@ -1,0 +1,9 @@
+use photoshare;
+INSERT INTO Users (first_name, last_name, dob, email, password, hometown, gender) VALUES ('a', 'b', '2020/01/01', 'a@b.com', '123', 'brooklyn', 'male');
+INSERT INTO Users (first_name, last_name, dob, email, password, hometown, gender) VALUES ('x', 'y', '2020/02/02', 'x@y.com', '890', 'boston', 'male');
+INSERT INTO Users (first_name, last_name, dob, email, password, hometown, gender) VALUES ('a', 'z', '2020/03/03', 'a@z.com', '567', 'phoneixtown', 'female');
+SELECT * FROM Users;
+INSERT INTO Friend (user_id, friend_id) VALUES ('1', '3');
+INSERT INTO Friend (user_id, friend_id) VALUES ('1', '2');
+INSERT INTO Friend (user_id, friend_id) VALUES ('3', '2');
+SELECT * FROM Friend;

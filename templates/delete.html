@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <!-- author ben lawson (balawson@bu.edu) -->
 <head>
-    <title>Delete a photo</title>
+    <title>Upload a photo!</title>
 </head>
     <body>
         <div class="title">
-            <h1>Delete your photos</h1>
+            <h1>Delete a photo from Photoshare</h1>
         </div>
-            <form method="post" enctype="multipart/form-data" action="/upload">
-                <label for="picture_id">Enter Picture ID:</label>
-                <input type="text" name="picture_id" required="true" /><br />
-                <input type="submit" value="Delete" />
+            <form method="post" action="/delete">
+                <label for="photo">Enter Photo ID:</label>
+                <input type="text" name="photo_id" required="true" /><br />
+                <input type="submit" value="delete" />
             </form>
+
+        {% if photos %}
+        <h2>Here are your photos</h2>
+            <ul>
+            {% for photo in photos %}
+
+                <li>ID: {{photo[1]}}<br>
+                <li>Caption: {{photo[2]}}<br>
+                <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
+                
+            {% endfor %}
+            </ul>
+        {% endif %}
     </body>
+
+    <ul>
+        <li><a href="/photos">Your Photos</a> </li>
+        <li><a href="/upload">Upload a photo</a> </li>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="/">Home</a></li>
+    </ul>
