@@ -279,19 +279,20 @@ def upload_file():
 # end photo uploading code
 
 # start photo deleting code
-@app.route('/delete', methods=['GET','POST'])
+@app.route('/delete', methods=['GET', 'POST'])
 @flask_login.login_required
-def delete_photo():
-    if request.method == 'GET':
-        return render_template('hello.html', delete=True, name=flask_login.current_user.id, message='Delete a photo!', photos=getUsersPhotos(uid), base64=base64)
-    else:
+def delete_file():
+    if request.method == 'POST':
         uid = getUserIdFromEmail(flask_login.current_user.id)
         photo_id = request.form.get('photo_id')
         cursor = conn.cursor()
         cursor.execute(
-            "DELETE FROM Photo WHERE photo_id = '{0}'".format(photo_id))
+            '''DELETE FROM Photo WHERE photo_id = %s''', (photo_id,))
         conn.commit()
-        return render_template('hello.html', delete=True, name=flask_login.current_user.id, message='Photo deleted!', photos=getUsersPhotos(uid), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, message='Photo deleted!', photos=getUsersPhotos(uid), base64=base64)
+    # The method is GET so we return a HTML form to upload the a photo.
+    else:
+        return render_template('delete.html')
 
 
 # default page
