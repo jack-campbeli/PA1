@@ -208,7 +208,7 @@ def add_friend():
 
     cursor = conn.cursor()
 
-    #### TESTING: for now assume id is correct
+    # TESTING: for now assume id is correct
     uid = getUserIdFromEmail(flask_login.current_user.id)
     if 1:
         print(cursor.execute(
@@ -224,12 +224,10 @@ def add_friend():
 @flask_login.login_required
 def loadFriend():
     uid = getUserIdFromEmail(flask_login.current_user.id)
-    list = getUsersFriends(uid)
+    friendList = getUsersFriends(uid)
+    fofList = getUsersFriendRecommendation(uid)
 
-    if (list == []):
-        return render_template('friends.html', name=flask_login.current_user.id)
-    else:
-        return render_template('friends.html', name=flask_login.current_user.id, friends=list)
+    return render_template('friends.html', name=flask_login.current_user.id, friends=friendList, recommended=fofList)
 
 def getUsersFriends(uid):
     cursor = conn.cursor()
@@ -237,6 +235,20 @@ def getUsersFriends(uid):
         "SELECT * FROM Friend WHERE user_id = '{0}'".format(uid))
     return cursor.fetchall()
 
+
+def getUsersFriendRecommendation(uid):
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT fof.friend_id, COUNT(fof.friend_Id) "
+        "FROM Friend fof, (SELECT T.friend_id FROM Friend T WHERE T.user_id = {0}) AS df "
+        "WHERE df.friend_id = fof.user_id "
+        "AND fof.friend_id <> {0} "
+        "AND fof.friend_id NOT IN (SELECT T.friend_id FROM Friend T WHERE T.user_id = {0}) "
+        "GROUP BY fof.friend_id".format(uid))
+    return cursor.fetchall()
+
+
+# begin photo uploading code
 # START photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
