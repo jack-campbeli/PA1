@@ -12,24 +12,12 @@
                 <input type="text" name="photo_id" required="true" /><br />
                 <input type="submit" value="delete" />
             </form>
-
-        {% if photos %}
-        <h2>Here are your photos</h2>
-            <ul>
-            {% for photo in photos %}
-
-                <li>ID: {{photo[1]}}<br>
-                <li>Caption: {{photo[2]}}<br>
-                <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
-                
-            {% endfor %}
-            </ul>
-        {% endif %}
     </body>
 
     <ul>
         <li><a href="/photos">Your Photos</a> </li>
         <li><a href="/upload">Upload a photo</a> </li>
+        <li><a href="/browse">Browse</a> </li>
         <li><a href="/logout">Logout</a></li>
         <li><a href="/">Home</a></li>
     </ul>

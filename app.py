@@ -170,6 +170,12 @@ def getUsersPhotos(uid):
     # return a list of tuples, [(imgdata, pid, caption), ...]
     return cursor.fetchall()
 
+def getAllPhotos():
+    cursor = conn.cursor()
+    cursor.execute("SELECT imgdata, user_id, caption FROM Photo") 
+    # return a list of tuples, [(imgdata, pid, caption), ...]
+    return cursor.fetchall()
+
 def getUserIdFromEmail(email):
     cursor = conn.cursor()
     cursor.execute(
@@ -186,12 +192,10 @@ def isEmailUnique(email):
         return True
 # END login code
 
-
 @app.route('/profile')
 @flask_login.login_required
 def protected():
     return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
-
 
 @app.route("/friends", methods=['POST'])
 @flask_login.login_required
@@ -215,7 +219,6 @@ def add_friend():
     else:
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('friends'))
-
 
 @app.route("/friends", methods=['GET'])
 @flask_login.login_required
@@ -275,6 +278,11 @@ def delete_file():
     else:
         return render_template('delete.html')
 # END photo deleting code
+
+# browsing page
+@app.route("/browse", methods=['GET'])
+def browse():
+    return render_template('hello.html', message='Welcome to Photoshare', allphotos=getAllPhotos(), base64=base64)
 
 # default page
 @app.route("/", methods=['GET'])
