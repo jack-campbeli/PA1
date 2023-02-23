@@ -11,31 +11,31 @@
   <h1>Hello {{ name }}!</h1>
 {% endif %}
 
+<!-- Displaying all user photos -->
 {% if photos %}
 <h2>Here are your photos</h2>
     <ul>
     {% for photo in photos %}
-
         <li>ID: {{photo[1]}}<br>
         <li>Caption: {{photo[2]}}<br>
         <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
-        
-
     {% endfor %}
     </ul>
 {% endif %}
 
 {% if message is none %}
   <p>You should <a href="/login">login!</a></p>
+  <li><a href="/">Home</a></li>
+{% elif message == 'Logged out' %}
+  <p>You should <a href="/login">login!</a></p>
 {% else %}
   <p> Go to <a href="/profile">profile?</a></p>
   <p> Go to <a href="friends">friends?</a></p>
+  <ul>
+    <li><a href="/photos">Your Photos</a> </li>
+    <li><a href="/upload">Upload a photo</a> </li>
+    <li><a href="/delete">Delete a photo</a> </li>
+    <li><a href="/logout">Logout</a></li>
+    <li><a href="/">Home</a></li>
+  </ul>    
 {% endif %}
-
-<ul>
-<li><a href="/photos">Your Photos</a> </li>
-<li><a href="/upload">Upload a photo</a> </li>
-<li><a href="/delete">Delete a photo</a> </li>
-<li><a href="/logout">Logout</a></li>
-<li><a href="/">Home</a></li>
-</ul>
