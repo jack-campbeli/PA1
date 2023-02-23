@@ -29,3 +29,15 @@ TO-DO:
     {% endfor %}
     </ul>
 {% endif %}
+
+
+<h3> Friend Recommendation </h3>
+{% if recommended %}
+    <ul>
+    {% for r in recommended %}
+
+        <li>ID: {{r[1]}}<br>
+
+    {% endfor %}
+    </ul>
+{% endif %}
