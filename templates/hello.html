@@ -18,6 +18,15 @@
         <li>ID: {{photo[1]}}<br>
         <li>Caption: {{photo[2]}}<br>
         <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
+
+        <!-- TESTING: DOESN'T VERIFY CURRENT USER -->
+        <h3>Comment: </h3>
+        <form method="post" action="{{ url_for('addComment') }}">
+          <label for="comment">Enter your comment:</label>
+          <input type="comment" name="{{photo[1]}}"/><br />
+          
+          <input type="submit"/>
+      </form>
     {% endfor %}
     </ul>
 {% endif %}

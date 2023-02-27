@@ -14,6 +14,8 @@ from flask import Flask, Response, request, render_template, redirect, url_for
 from flaskext.mysql import MySQL
 import flask_login
 
+from datetime import date
+
 # for image uploading
 import os
 import base64
@@ -38,13 +40,16 @@ cursor = conn.cursor()
 cursor.execute("SELECT email from Users")
 users = cursor.fetchall()
 
+
 def getUserList():
     cursor = conn.cursor()
     cursor.execute("SELECT email from Users")
     return cursor.fetchall()
 
+
 class User(flask_login.UserMixin):
     pass
+
 
 @login_manager.user_loader
 def user_loader(email):
@@ -54,6 +59,7 @@ def user_loader(email):
     user = User()
     user.id = email
     return user
+
 
 @login_manager.request_loader
 def request_loader(request):
@@ -71,12 +77,14 @@ def request_loader(request):
     user.is_authenticated = request.form['password'] == pwd
     return user
 
+
 '''
 A new page looks like this:
 @app.route('new_page_name')
 def new_page_function():
 	return new_page_html
 '''
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -107,25 +115,31 @@ def login():
     return "<a href='/login'>Try again</a>\
 			</br><a href='/register'>or make an account</a>"
 
+
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
     return render_template('hello.html', message='Logged out')
+
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return render_template('unauth.html')
 
 # you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
+
+
 @app.route("/register", methods=['GET'])
 def register():
     return render_template('register.html', supress='True')
+
 
 @app.route("/photos", methods=['GET'])
 @flask_login.login_required
 def Photo():
     uid = getUserIdFromEmail(flask_login.current_user.id)
     return render_template('hello.html', message='These are your photos', photos=getUsersPhotos(uid), base64=base64)
+
 
 @app.route("/register", methods=['POST'])
 def register_user():
@@ -163,6 +177,7 @@ def register_user():
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('register'))
 
+
 def getUsersPhotos(uid):
     cursor = conn.cursor()
     cursor.execute(
@@ -170,11 +185,13 @@ def getUsersPhotos(uid):
     # return a list of tuples, [(imgdata, pid, caption), ...]
     return cursor.fetchall()
 
+
 def getUserIdFromEmail(email):
     cursor = conn.cursor()
     cursor.execute(
         "SELECT user_id FROM Users WHERE email = '{0}'".format(email))
     return cursor.fetchone()[0]
+
 
 def isEmailUnique(email):
     # use this to check if a email has already been registered
@@ -186,10 +203,12 @@ def isEmailUnique(email):
         return True
 # END login code
 
+
 @app.route('/profile')
 @flask_login.login_required
 def protected():
     return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
+
 
 @app.route("/friends", methods=['POST'])
 @flask_login.login_required
@@ -201,13 +220,14 @@ def add_friend():
         return flask.redirect(flask.url_for('friends'))
 
     cursor = conn.cursor()
-    
+
     uid = getUserIdFromEmail(flask_login.current_user.id)
     print(cursor.execute(
         "INSERT INTO Friend (user_id, friend_id) VALUES ('{0}', '{1}')".format(uid, friend_id)))
     conn.commit()
 
     return render_template('friends.html', name=flask_login.current_user.id, friends=getUsersFriends(uid))
+
 
 @app.route("/friends", methods=['GET'])
 @flask_login.login_required
@@ -216,7 +236,8 @@ def loadFriend():
     friendList = getUsersFriends(uid)
     fofList = getUsersFriendRecommendation(uid)
 
-    return render_template('friends.html', name=flask_login.current_user.id, friends=friendList, recommended=fofList)
+    return render_template('friends.html', name=flask_login.current_user.id, friends=getUsersFriends(uid), recommended=fofList)
+
 
 def getUsersFriends(uid):
     cursor = conn.cursor()
@@ -242,8 +263,10 @@ def getUsersFriendRecommendation(uid):
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
 
 @app.route('/upload', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -264,6 +287,8 @@ def upload_file():
 # END photo uploading code
 
 # START photo deleting code
+
+
 @app.route('/delete', methods=['GET', 'POST'])
 @flask_login.login_required
 def delete_file():
@@ -281,25 +306,53 @@ def delete_file():
 # END photo deleting code
 
 # START browsing page code
+
+
 def getAllPhotos():
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, first_name, caption \n" 
-        "FROM Photo \n"  
-        "INNER JOIN Users \n" 
+        "SELECT imgdata, first_name, caption \n"
+        "FROM Photo \n"
+        "INNER JOIN Users \n"
         "ON Photo.user_id = Users.user_id;")
     # return a list of tuples, [(imgdata, first_name, caption), ...]
     return cursor.fetchall()
+
 
 @app.route("/browse", methods=['GET'])
 def browse():
     return render_template('hello.html', message='Welcome to Photoshare', allphotos=getAllPhotos(), base64=base64)
 # END browsing page code
 
+
+@app.route("/hello", methods=['POST'])
+@flask_login.login_required
+def addComment():
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+
+    try:
+        photoVal = request.form
+        photo_id = list(photoVal.to_dict().keys())[0]
+        text = list(photoVal.to_dict().values())[0]
+        print("printing: ", photo_id, "_", text)
+    except:
+        print("couldn't find all tokens")
+        return flask.redirect(flask.url_for('hello'))
+
+    cursor = conn.cursor()
+    print(cursor.execute(
+        "INSERT INTO Comment (user_id, photo_id, date, text) VALUES ('{0}', '{1}', '{2}', '{3}')".format(uid, photo_id, date.today(), text)
+    ))
+    conn.commit()
+
+    return render_template('hello.html', name=flask_login.current_user.id, photos=getUsersPhotos(uid), base64=base64)
+
+
 # default page
-@app.route("/", methods=['GET'])
+@ app.route("/", methods=['GET'])
 def hello():
     return render_template('hello.html', message='Welcome to Photoshare')
+
 
 if __name__ == "__main__":
     # this is invoked when in the shell you run
