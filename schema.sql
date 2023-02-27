@@ -23,21 +23,33 @@ CREATE TABLE Users (
 	CHECK (contribution_score >= 0)
 );
 
-CREATE TABLE Photo (
---     album_id int4 NOT NULL,
+CREATE TABLE Album (
+	album_id INT AUTO_INCREMENT,
+	user_id INT NOT NULL,
+	a_name VARCHAR(255) NOT NULL,
+	creation_date VARCHAR(255),
     
+	CONSTRAINT album_pk PRIMARY KEY (album_id),
+	FOREIGN KEY (user_id) 
+		REFERENCES Users (user_id) 
+        ON DELETE CASCADE
+);
+
+CREATE TABLE Photo (
 	photo_id int4 AUTO_INCREMENT,
+    album_id int4 NOT NULL,
 	user_id int4,
 	imgdata longblob,
 	caption VARCHAR(255),
 	INDEX upid_idx (user_id),
-	CONSTRAINT photo_pk PRIMARY KEY (photo_id)
+	CONSTRAINT photo_pk PRIMARY KEY (photo_id),
 
--- 	FOREIGN KEY (user_id) 
--- 		REFERENCES Users (user_id) 
--- 		ON DELETE CASCADE,
--- 	FOREIGN KEY (album_id) 	
--- 		REFERENCES Album (album_id)
+	FOREIGN KEY (user_id)
+		REFERENCES Users (user_id)
+		ON DELETE CASCADE,
+	FOREIGN KEY (album_id)
+		REFERENCES Album (album_id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE Friend (
@@ -48,16 +60,6 @@ CREATE TABLE Friend (
   FOREIGN KEY (user_id) REFERENCES Users(user_id),
   FOREIGN KEY (friend_id) REFERENCES Users(user_id),
   CHECK (user_id <> friend_id)
-);
-
-CREATE TABLE Album (
-	album_id INT AUTO_INCREMENT,
-	user_id INT NOT NULL,
-	a_name VARCHAR(255) NOT NULL,
-	creation_date VARCHAR(255) NOT NULL,
-    
-	CONSTRAINT album_pk PRIMARY KEY (album_id),
-	FOREIGN KEY (user_id) REFERENCES Users (user_id)
 );
 
 CREATE TABLE Tag (

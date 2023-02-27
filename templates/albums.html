@@ -1,31 +1,25 @@
 <!DOCTYPE html>
 <!-- author ben lawson (balawson@bu.edu) -->
 <head>
-    <title>Upload a photo!</title>
+    <title>Create an album!</title>
 </head>
     <body>
         <div class="title">
-            <h1>Upload a photo to Photoshare</h1>
+            <h1>Create an album on Photoshare</h1>
         </div>
-            <form method="post" enctype="multipart/form-data" action="/upload">
-                <label for="photo">Select photo:</label>
-                <input type="file" name="photo" required="true" /><br />
-                
-                <label for="caption">Enter caption:</label>
-                <input type="text" name="caption" required="true" /><br />
-                
+            <form method="post" action="/albums">                
                 <label for="album_name">Enter album name:</label>
                 <input type="text" name="album_name" required="true" /><br />
                 
-                <input type="submit" value="Upload" />
+                <input type="submit" value="Create" />
             </form>
     </body>
 
     <ul>
         <li><a href="/photos">Your Photos</a> </li>
-        <li><a href="/albums">Create an album</a> </li>
         <li><a href="/delete">Delete a photo</a> </li>
         <li><a href="/browse">Browse</a> </li>
+        <li><a href="/upload">Upload a photo</a> </li>
         <li><a href="/logout">Logout</a></li>
         <li><a href="/">Home</a></li>
     </ul>

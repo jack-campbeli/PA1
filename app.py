@@ -229,7 +229,6 @@ def getUsersFriends(uid):
         "SELECT * FROM Friend WHERE user_id = '{0}'".format(uid))
     return cursor.fetchall()
 
-
 def getUsersFriendRecommendation(uid):
     cursor = conn.cursor()
     cursor.execute(
@@ -242,13 +241,28 @@ def getUsersFriendRecommendation(uid):
     return cursor.fetchall()
 
 
-# begin photo uploading code
 # START photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+def getAlbumIdFromName(album_name):
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT album_id FROM Album WHERE a_name = '{0}'".format(album_name))
+    result = cursor.fetchone()
+    if result is not None:
+        return result[0]
+    else:
+        return None
+
+def createAlbum(album_name, uid):
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO Album (a_name, user_id) VALUES ('{0}', '{1}')".format(album_name, uid))
+    conn.commit()
 
 @app.route('/upload', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -257,16 +271,37 @@ def upload_file():
         uid = getUserIdFromEmail(flask_login.current_user.id)
         imgfile = request.files['photo']
         caption = request.form.get('caption')
+        album_name = request.form.get('album_name')
         imgdata = imgfile.read()
+        albumid = getAlbumIdFromName(album_name)
+        if albumid == None:
+            createAlbum(album_name, uid)
+            albumid = getAlbumIdFromName(album_name)
         cursor = conn.cursor()
         cursor.execute(
-            '''INSERT INTO Photo (imgdata, user_id, caption) VALUES (%s, %s, %s)''', (imgdata, uid, caption))
+            '''INSERT INTO Photo (imgdata, user_id, caption, album_id) VALUES (%s, %s, %s, %s)''', (imgdata, uid, caption, albumid))
         conn.commit()
         return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('upload.html')
 # END photo uploading code
+
+# START album creation code
+@app.route('/albums', methods=['GET', 'POST'])
+@flask_login.login_required
+def create_album():
+    if request.method == 'POST':
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+        album_name = request.form.get('album_name')
+        cursor = conn.cursor()
+        cursor.execute(
+            '''INSERT INTO Album (a_name, user_id) VALUES (%s, %s)''', (album_name, uid))
+        conn.commit()
+        return render_template('hello.html', name=flask_login.current_user.id, message='Album created!', photos=getUsersPhotos(uid), base64=base64)
+    # The method is GET so we return a HTML form to upload the a photo.
+    else:
+        return render_template('albums.html')
 
 # START photo deleting code
 @app.route('/delete', methods=['GET', 'POST'])
