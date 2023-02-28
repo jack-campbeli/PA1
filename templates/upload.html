@@ -7,25 +7,26 @@
         <div class="title">
             <h1>Upload a photo to Photoshare</h1>
         </div>
-            <form method="post" enctype="multipart/form-data" action="/upload">
-                <label for="photo">Select photo:</label>
-                <input type="file" name="photo" required="true" /><br />
-                
-                <label for="caption">Enter caption:</label>
-                <input type="text" name="caption" required="true" /><br />
-                
-                <label for="a_name">Enter album name:</label>
-                <input type="text" name="a_name" required="true" /><br />
-                
-                <input type="submit" value="Upload" />
-            </form>
-    </body>
 
-    <ul>
-        <li><a href="/photos">Your Photos</a> </li>
-        <li><a href="/albums">Create an album</a> </li>
-        <li><a href="/delete">Delete a photo</a> </li>
-        <li><a href="/browse">Browse</a> </li>
-        <li><a href="/logout">Logout</a></li>
-        <li><a href="/">Home</a></li>
-    </ul>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/browse">Browse</a> </li>
+            <li><a href="/photos">Your Photos</a> </li>
+            <li><a href="/albums">Create an album</a> </li>
+            <li><a href="/delete">Delete</a> </li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+
+        <form method="post" enctype="multipart/form-data" action="/upload">
+            <label for="photo">Select photo:</label>
+            <input type="file" name="photo" required="true" /><br />
+            
+            <label for="caption">Enter caption:</label>
+            <input type="text" name="caption" required="true" /><br />
+            
+            <label for="a_name">Enter album name:</label>
+            <input type="text" name="a_name" required="true" /><br />
+            
+            <input type="submit" value="Upload" />
+        </form>
+    </body>
