@@ -78,6 +78,10 @@ CREATE TABLE Comment (
 	text longtext NOT NULL,
     
 	CONSTRAINT comment_pk PRIMARY KEY (comment_id),
-	FOREIGN KEY (photo_id) REFERENCES Photo (photo_id),
-	FOREIGN KEY (user_id) REFERENCES Users (user_id)
+	FOREIGN KEY (photo_id) 
+		REFERENCES Photo (photo_id) 
+        ON DELETE CASCADE,
+	FOREIGN KEY (user_id) 
+		REFERENCES Users (user_id) 
+        ON DELETE CASCADE
 );
