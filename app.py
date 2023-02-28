@@ -85,6 +85,7 @@ def new_page_function():
 	return new_page_html
 '''
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if flask.request.method == 'GET':
@@ -126,6 +127,7 @@ def unauthorized_handler():
     return render_template('unauth.html')
 
 # you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
+
 
 @app.route("/register", methods=['GET'])
 def register():
@@ -294,7 +296,7 @@ def upload_file():
         cursor.execute(
             '''INSERT INTO Photo (imgdata, user_id, caption, album_id) VALUES (%s, %s, %s, %s)''', (imgdata, uid, caption, album_id))
         conn.commit()
-        return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid), comments=getAllComment(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('upload.html')
@@ -319,7 +321,7 @@ def create_album():
         uid = getUserIdFromEmail(flask_login.current_user.id)
         a_name = request.form.get('a_name')
         createAlbum(a_name, uid)
-        return render_template('hello.html', name=flask_login.current_user.id, message='Album created!', photos=getUsersPhotos(uid), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, message='Album created!', photos=getUsersPhotos(uid), comments=getAllComment(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('albums.html')
@@ -346,7 +348,7 @@ def delete_file():
                 '''DELETE FROM Album WHERE album_id = %s''', (album_id,))
             # message = 'Album deleted!'
         conn.commit()
-        return render_template('hello.html', name=flask_login.current_user.id, message='Photo/Album deleted!', photos=getUsersPhotos(uid), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, message='Photo/Album deleted!', photos=getUsersPhotos(uid), comments=getAllComment(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('delete.html')

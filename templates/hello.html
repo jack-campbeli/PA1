@@ -25,12 +25,12 @@
         {% if comments %}
         <ul>
           {% for comment in comments %}
-            <!-- {% if photo[1] == comment[2] %} -->
+            {% if photo[1] == comment[2] %}
               <li>UID: {{comment[1]}}<br>
               <li>PID: {{comment[2]}}<br>
               <li>Text: {{comment[4]}}<br>
               <br>
-            <!-- {% endif %} -->
+            {% endif %}
           {% endfor %}
         </ul>
         {% endif %}
@@ -41,6 +41,7 @@
 {% endif %}
 
 
+<!-- FOR BROWSING -->
 <!-- Displaying every users photos -->
 {% if allphotos %}
 <h2>Here are everyones photos</h2>
@@ -64,10 +65,12 @@
         {% if comments %}
         <ul>
           {% for comment in comments %}
+            {% if photo[3] == comment[2] %}
               <li>UID: {{comment[1]}}<br>
               <li>PID: {{comment[2]}}<br>
               <li>Text: {{comment[4]}}<br>
               <br>
+            {% endif %}
           {% endfor %}
         </ul>
         {% endif %}
