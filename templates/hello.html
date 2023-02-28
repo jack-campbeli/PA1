@@ -20,15 +20,16 @@
         <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
 
         <!-- load comments -->
+        <h3>Comment: </h3>
         {% if comments %}
         <ul>
           {% for comment in comments %}
-            {% if photo[1] == comment[2] %}
+            <!-- {% if photo[1] == comment[2] %} -->
               <li>UID: {{comment[1]}}<br>
               <li>PID: {{comment[2]}}<br>
               <li>Text: {{comment[4]}}<br>
               <br>
-            {% endif %}
+            <!-- {% endif %} -->
           {% endfor %}
         </ul>
         {% endif %}

@@ -85,7 +85,6 @@ def new_page_function():
 	return new_page_html
 '''
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if flask.request.method == 'GET':
@@ -127,7 +126,6 @@ def unauthorized_handler():
     return render_template('unauth.html')
 
 # you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
-
 
 @app.route("/register", methods=['GET'])
 def register():
@@ -354,13 +352,12 @@ def delete_file():
         return render_template('delete.html')
 # END photo deleting code
 
+
 # START browsing page code
-
-
 def getAllPhotos():
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, first_name, caption,\n"
+        "SELECT imgdata, first_name, caption \n"
         "FROM Photo \n"
         "INNER JOIN Users \n"
         "ON Photo.user_id = Users.user_id;")
