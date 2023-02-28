@@ -10,7 +10,7 @@
   <h1>Hello {{ name }}!</h1>
 {% endif %}
 
-<!-- Displaying all user photos -->
+<!-- Displaying user photos -->
 {% if photos %}
 <h2>Here are your photos</h2>
     <ul>
@@ -45,6 +45,7 @@
     </ul>
 {% endif %}
 
+<!-- Displaying every users photos -->
 {% if allphotos %}
 <h2>Here are everyones photos</h2>
     <ul>
@@ -68,6 +69,7 @@
   <p> Go to <a href="friends">friends?</a></p>
   <ul>
     <li><a href="/photos">Your Photos</a> </li>
+    <li><a href="/albums">Create an album</a> </li>
     <li><a href="/browse">Browse</a> </li>
     <li><a href="/upload">Upload a photo</a> </li>
     <li><a href="/delete">Delete a photo</a> </li>

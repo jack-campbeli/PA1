@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <!-- author ben lawson (balawson@bu.edu) -->
 <head>
-    <title>Upload a photo!</title>
+    <title>Delete photos!</title>
 </head>
     <body>
         <div class="title">
-            <h1>Delete a photo from Photoshare</h1>
+            <h1>Delete a photo/album from Photoshare</h1>
         </div>
             <form method="post" action="/delete">
-                <label for="photo">Enter Photo ID:</label>
-                <input type="text" name="photo_id" required="true" /><br />
+                <label for="photo">Enter photo ID:</label>
+                <input type="text" name="photo_id" /><br />
+                <input type="submit" value="delete" />
+                <br />
+                <label for="album">Enter album name:</label>
+                <input type="text" name="a_name" /><br />
                 <input type="submit" value="delete" />
             </form>
     </body>
 
     <ul>
         <li><a href="/photos">Your Photos</a> </li>
+        <li><a href="/albums">Create an album</a> </li>
         <li><a href="/upload">Upload a photo</a> </li>
         <li><a href="/browse">Browse</a> </li>
         <li><a href="/logout">Logout</a></li>
