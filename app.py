@@ -12,7 +12,7 @@
 import flask
 from flask import Flask, Response, request, render_template, redirect, url_for
 from flaskext.mysql import MySQL
-import flask_login
+import flask_login 
 
 from datetime import date
 
@@ -306,9 +306,11 @@ def upload_file():
 
 
 def createAlbum(a_name, uid):
+    creation_date = date.today()
+    print(creation_date)
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO Album (a_name, user_id) VALUES ('{0}', '{1}')".format(a_name, uid))
+        "INSERT INTO Album (a_name, user_id, creation_date) VALUES ('{0}', '{1}', '{2}')".format(a_name, uid, creation_date))
     conn.commit()
 
 
@@ -318,10 +320,7 @@ def create_album():
     if request.method == 'POST':
         uid = getUserIdFromEmail(flask_login.current_user.id)
         a_name = request.form.get('a_name')
-        cursor = conn.cursor()
-        cursor.execute(
-            '''INSERT INTO Album (a_name, user_id) VALUES (%s, %s)''', (a_name, uid))
-        conn.commit()
+        createAlbum(a_name, uid)
         return render_template('hello.html', name=flask_login.current_user.id, message='Album created!', photos=getUsersPhotos(uid), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:

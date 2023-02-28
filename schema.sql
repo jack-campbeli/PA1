@@ -27,7 +27,7 @@ CREATE TABLE Album (
 	album_id INT AUTO_INCREMENT,
 	user_id INT NOT NULL,
 	a_name VARCHAR(255) NOT NULL,
-	creation_date VARCHAR(255),
+	creation_date date,
     
 	CONSTRAINT album_pk PRIMARY KEY (album_id),
 	FOREIGN KEY (user_id) 
