@@ -139,6 +139,7 @@ def register():
 def Photo():
     uid = getUserIdFromEmail(flask_login.current_user.id)
     commentList = getAllComment()
+
     return render_template('hello.html', message='These are your photos', photos=getUsersPhotos(uid), comments=commentList, base64=base64)
 
 
@@ -245,6 +246,7 @@ def getUsersFriends(uid):
         "SELECT * FROM Friend WHERE user_id = '{0}'".format(uid))
     return cursor.fetchall()
 
+
 def getUsersFriendRecommendation(uid):
     cursor = conn.cursor()
     cursor.execute(
@@ -265,6 +267,7 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+
 def getAlbumIdFromName(a_name):
     cursor = conn.cursor()
     cursor.execute(
@@ -274,6 +277,7 @@ def getAlbumIdFromName(a_name):
         return result[0]
     else:
         return None
+
 
 @app.route('/upload', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -299,11 +303,14 @@ def upload_file():
 # END photo uploading code
 
 # START album creation code
+
+
 def createAlbum(a_name, uid):
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO Album (a_name, user_id) VALUES ('{0}', '{1}')".format(a_name, uid))
     conn.commit()
+
 
 @app.route('/albums', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -321,9 +328,8 @@ def create_album():
         return render_template('albums.html')
 # END album creation code
 
+
 # START photo deleting code
-
-
 @app.route('/delete', methods=['GET', 'POST'])
 @flask_login.login_required
 def delete_file():
@@ -378,7 +384,6 @@ def addComment():
         photoVal = request.form
         photo_id = list(photoVal.to_dict().keys())[0]
         text = list(photoVal.to_dict().values())[0]
-        # print("printing: ", photo_id, "_", text)
     except:
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('hello'))
@@ -390,12 +395,12 @@ def addComment():
     )
     conn.commit()
 
-    return render_template('hello.html', name=flask_login.current_user.id, photos=getUsersPhotos(uid), base64=base64)
+    return render_template('hello.html', name=flask_login.current_user.id, photos=getUsersPhotos(uid), comments=getAllComment(), base64=base64)
+
 
 def getAllComment():
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT * FROM Comment")
+    cursor.execute("SELECT * FROM Comment")
     return cursor.fetchall()
 
 
