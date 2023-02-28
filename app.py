@@ -367,10 +367,22 @@ def getAllPhotos():
     # return a list of tuples, [(imgdata, first_name, caption), ...]
     return cursor.fetchall()
 
+def getBrowsingPhotos(user_id):
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT imgdata, first_name, caption "
+        "FROM Photo "
+        "INNER JOIN Users "
+        "ON Photo.user_id = Users.user_id "
+        "WHERE Users.user_id <> %s",(user_id,))
+    # return a list of tuples, [(imgdata, first_name, caption), ...]
+    return cursor.fetchall()
+
 
 @app.route("/browse", methods=['GET'])
 def browse():
-    return render_template('hello.html', message='Welcome to Photoshare', allphotos=getAllPhotos(), base64=base64)
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    return render_template('hello.html', message='Welcome to Photoshare', allphotos=getBrowsingPhotos(uid), base64=base64)
 # END browsing page code
 
 
