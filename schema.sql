@@ -32,7 +32,7 @@ CREATE TABLE Album (
 	CONSTRAINT album_pk PRIMARY KEY (album_id),
 	FOREIGN KEY (user_id) 
 		REFERENCES Users (user_id) 
-        ON DELETE CASCADE
+        ON DELETE CASCADE 
 );
 
 CREATE TABLE Photo (
