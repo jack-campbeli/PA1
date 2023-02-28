@@ -138,7 +138,8 @@ def register():
 @flask_login.login_required
 def Photo():
     uid = getUserIdFromEmail(flask_login.current_user.id)
-    return render_template('hello.html', message='These are your photos', photos=getUsersPhotos(uid), base64=base64)
+    commentList = getAllComment()
+    return render_template('hello.html', message='These are your photos', photos=getUsersPhotos(uid), comments=commentList, base64=base64)
 
 
 @app.route("/register", methods=['POST'])
@@ -235,8 +236,7 @@ def loadFriend():
     uid = getUserIdFromEmail(flask_login.current_user.id)
     friendList = getUsersFriends(uid)
     fofList = getUsersFriendRecommendation(uid)
-
-    return render_template('friends.html', name=flask_login.current_user.id, friends=getUsersFriends(uid), recommended=fofList)
+    return render_template('friends.html', name=flask_login.current_user.id, friends=friendList, recommended=fofList)
 
 
 def getUsersFriends(uid):
@@ -334,22 +334,29 @@ def addComment():
         photoVal = request.form
         photo_id = list(photoVal.to_dict().keys())[0]
         text = list(photoVal.to_dict().values())[0]
-        print("printing: ", photo_id, "_", text)
+        # print("printing: ", photo_id, "_", text)
     except:
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('hello'))
 
     cursor = conn.cursor()
-    print(cursor.execute(
-        "INSERT INTO Comment (user_id, photo_id, date, text) VALUES ('{0}', '{1}', '{2}', '{3}')".format(uid, photo_id, date.today(), text)
-    ))
+    cursor.execute(
+        "INSERT INTO Comment (user_id, photo_id, date, text) VALUES ('{0}', '{1}', '{2}', '{3}')".format(
+            uid, photo_id, date.today(), text)
+    )
     conn.commit()
 
     return render_template('hello.html', name=flask_login.current_user.id, photos=getUsersPhotos(uid), base64=base64)
 
+def getAllComment():
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM Comment")
+    return cursor.fetchall()
+
 
 # default page
-@ app.route("/", methods=['GET'])
+@app.route("/", methods=['GET'])
 def hello():
     return render_template('hello.html', message='Welcome to Photoshare')
 
