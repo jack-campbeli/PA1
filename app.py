@@ -243,21 +243,15 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-def getAlbumIdFromName(album_name):
+def getAlbumIdFromName(a_name):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT album_id FROM Album WHERE a_name = '{0}'".format(album_name))
+        "SELECT album_id FROM Album WHERE a_name = '{0}'".format(a_name))
     result = cursor.fetchone()
     if result is not None:
         return result[0]
     else:
         return None
-
-def createAlbum(album_name, uid):
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO Album (a_name, user_id) VALUES ('{0}', '{1}')".format(album_name, uid))
-    conn.commit()
 
 @app.route('/upload', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -266,15 +260,15 @@ def upload_file():
         uid = getUserIdFromEmail(flask_login.current_user.id)
         imgfile = request.files['photo']
         caption = request.form.get('caption')
-        album_name = request.form.get('album_name')
+        a_name = request.form.get('a_name')
         imgdata = imgfile.read()
-        albumid = getAlbumIdFromName(album_name)
-        if albumid == None:
-            createAlbum(album_name, uid)
-            albumid = getAlbumIdFromName(album_name)
+        album_id = getAlbumIdFromName(a_name)
+        # if album_id == None:
+        #     createAlbum(a_name, uid)
+        #     album_id = getAlbumIdFromName(a_name)
         cursor = conn.cursor()
         cursor.execute(
-            '''INSERT INTO Photo (imgdata, user_id, caption, album_id) VALUES (%s, %s, %s, %s)''', (imgdata, uid, caption, albumid))
+            '''INSERT INTO Photo (imgdata, user_id, caption, album_id) VALUES (%s, %s, %s, %s)''', (imgdata, uid, caption, album_id))
         conn.commit()
         return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
@@ -283,20 +277,27 @@ def upload_file():
 # END photo uploading code
 
 # START album creation code
+def createAlbum(a_name, uid):
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO Album (a_name, user_id) VALUES ('{0}', '{1}')".format(a_name, uid))
+    conn.commit()
+
 @app.route('/albums', methods=['GET', 'POST'])
 @flask_login.login_required
 def create_album():
     if request.method == 'POST':
         uid = getUserIdFromEmail(flask_login.current_user.id)
-        album_name = request.form.get('album_name')
+        a_name = request.form.get('a_name')
         cursor = conn.cursor()
         cursor.execute(
-            '''INSERT INTO Album (a_name, user_id) VALUES (%s, %s)''', (album_name, uid))
+            '''INSERT INTO Album (a_name, user_id) VALUES (%s, %s)''', (a_name, uid))
         conn.commit()
         return render_template('hello.html', name=flask_login.current_user.id, message='Album created!', photos=getUsersPhotos(uid), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('albums.html')
+# END album creation code
 
 # START photo deleting code
 @app.route('/delete', methods=['GET', 'POST'])
@@ -305,11 +306,20 @@ def delete_file():
     if request.method == 'POST':
         uid = getUserIdFromEmail(flask_login.current_user.id)
         photo_id = request.form.get('photo_id')
+        a_name = request.form.get('a_name')
         cursor = conn.cursor()
-        cursor.execute(
-            '''DELETE FROM Photo WHERE photo_id = %s''', (photo_id,))
+        if photo_id:
+            cursor.execute(
+                '''DELETE FROM Photo WHERE photo_id = %s''', (photo_id,))
+            # message = 'Photo deleted!'
+        elif a_name:
+            album_id = getAlbumIdFromName(a_name)
+            print(album_id)
+            cursor.execute(
+                '''DELETE FROM Album WHERE album_id = %s''', (album_id,))
+            # message = 'Album deleted!'
         conn.commit()
-        return render_template('hello.html', name=flask_login.current_user.id, message='Photo deleted!', photos=getUsersPhotos(uid), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, message='Photo/Album deleted!', photos=getUsersPhotos(uid), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('delete.html')
