@@ -93,7 +93,7 @@ def login():
 			    <form action='login' method='POST'>
 				<input type='text' name='email' id='email' placeholder='email'></input>
 				<input type='password' name='password' id='password' placeholder='password'></input>
-				<input type='submit' name='submit'></input>
+				<input type='submit' name='submit' value="Sign In"></input>
 			    </form></br>
 		        <a href='/'>Home</a>
 			   '''
