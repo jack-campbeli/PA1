@@ -17,7 +17,8 @@
     {% for photo in photos %}
         <li>ID: {{photo[1]}}<br>
         <li>Caption: {{photo[2]}}<br>
-        <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
+        <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}' 
+            width="400" height=auto/></li>
 
         <!-- load comments -->
         <h3>Comment: </h3>
@@ -39,6 +40,7 @@
     </ul>
 {% endif %}
 
+
 <!-- Displaying every users photos -->
 {% if allphotos %}
 <h2>Here are everyones photos</h2>
@@ -46,10 +48,10 @@
     {% for photo in allphotos %}
         <li>User: {{photo[1]}}<br>
         <li>Caption: {{photo[2]}}<br>
-        <li>TESTING: {{photo[3]}}<br> <!-- testing -->
-        <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
+        <li>Picture_ID: {{photo[3]}}<br> <!-- TESTING -->
+        <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'
+            width="450" height=auto/></li>
 
-        <!-- TESTING: DOESN'T VERIFY CURRENT USER -->
         <h3>Comment: </h3>
         <form method="post" action="{{ url_for('addComment') }}">
           <label for="comment">Enter your comment:</label>
