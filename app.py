@@ -367,6 +367,7 @@ def getAllPhotos():
     # return a list of tuples, [(imgdata, first_name, caption), ...]
     return cursor.fetchall()
 
+@flask_login.login_required
 def getBrowsingPhotos(user_id):
     cursor = conn.cursor()
     cursor.execute(
@@ -378,11 +379,14 @@ def getBrowsingPhotos(user_id):
     # return a list of tuples, [(imgdata, first_name, caption), ...]
     return cursor.fetchall()
 
-
 @app.route("/browse", methods=['GET'])
 def browse():
-    uid = getUserIdFromEmail(flask_login.current_user.id)
-    return render_template('hello.html', message='Welcome to Photoshare', allphotos=getBrowsingPhotos(uid), base64=base64)
+    if flask_login.current_user.is_authenticated:
+        user_id = getUserIdFromEmail(flask_login.current_user.id)
+        photos = getBrowsingPhotos(user_id)
+    else:
+        photos = getAllPhotos()
+    return render_template('hello.html', message='Welcome to Photoshare', allphotos=photos, base64=base64)
 # END browsing page code
 
 
