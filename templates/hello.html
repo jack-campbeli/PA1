@@ -19,23 +19,16 @@
         <li>Caption: {{photo[2]}}<br>
         <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
 
-        <!-- TESTING: DOESN'T VERIFY CURRENT USER -->
-        <h3>Comment: </h3>
-        <form method="post" action="{{ url_for('addComment') }}">
-          <label for="comment">Enter your comment:</label>
-          <input type="comment" name="{{photo[1]}}"/><br />
-          
-          <input type="submit"/>
-        </form>
-
         <!-- load comments -->
         {% if comments %}
         <ul>
           {% for comment in comments %}
+            {% if photo[1] == comment[2] %}
               <li>UID: {{comment[1]}}<br>
               <li>PID: {{comment[2]}}<br>
               <li>Text: {{comment[4]}}<br>
               <br>
+            {% endif %}
           {% endfor %}
         </ul>
         {% endif %}
@@ -52,7 +45,30 @@
     {% for photo in allphotos %}
         <li>User: {{photo[1]}}<br>
         <li>Caption: {{photo[2]}}<br>
+        <li>TESTING: {{photo[3]}}<br> <!-- testing -->
         <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li>
+
+        <!-- TESTING: DOESN'T VERIFY CURRENT USER -->
+        <h3>Comment: </h3>
+        <form method="post" action="{{ url_for('addComment') }}">
+          <label for="comment">Enter your comment:</label>
+          <input type="comment" name="{{photo[3]}}"/><br />
+          
+          <input type="submit"/>
+        </form>
+
+        <!-- load comments -->
+        {% if comments %}
+        <ul>
+          {% for comment in comments %}
+              <li>UID: {{comment[1]}}<br>
+              <li>PID: {{comment[2]}}<br>
+              <li>Text: {{comment[4]}}<br>
+              <br>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
     {% endfor %}
     </ul>
 {% endif %}

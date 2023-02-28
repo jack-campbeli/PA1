@@ -12,7 +12,7 @@
 import flask
 from flask import Flask, Response, request, render_template, redirect, url_for
 from flaskext.mysql import MySQL
-import flask_login 
+import flask_login
 
 from datetime import date
 
@@ -360,24 +360,26 @@ def delete_file():
 def getAllPhotos():
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, first_name, caption \n"
+        "SELECT imgdata, first_name, caption,\n"
         "FROM Photo \n"
         "INNER JOIN Users \n"
         "ON Photo.user_id = Users.user_id;")
-    # return a list of tuples, [(imgdata, first_name, caption), ...]
+    # return a list of tuples, [(imgdata, first_name, caption, photo_id), ...]
     return cursor.fetchall()
+
 
 @flask_login.login_required
 def getBrowsingPhotos(user_id):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, first_name, caption "
+        "SELECT imgdata, first_name, caption, photo_id "
         "FROM Photo "
         "INNER JOIN Users "
         "ON Photo.user_id = Users.user_id "
-        "WHERE Users.user_id <> %s",(user_id,))
+        "WHERE Users.user_id <> %s", (user_id,))
     # return a list of tuples, [(imgdata, first_name, caption), ...]
     return cursor.fetchall()
+
 
 @app.route("/browse", methods=['GET'])
 def browse():
@@ -386,7 +388,7 @@ def browse():
         photos = getBrowsingPhotos(user_id)
     else:
         photos = getAllPhotos()
-    return render_template('hello.html', message='Welcome to Photoshare', allphotos=photos, base64=base64)
+    return render_template('hello.html', message='Welcome to Photoshare', allphotos=photos, comments=getAllComment(), base64=base64)
 # END browsing page code
 
 
@@ -410,7 +412,7 @@ def addComment():
     )
     conn.commit()
 
-    return render_template('hello.html', name=flask_login.current_user.id, photos=getUsersPhotos(uid), comments=getAllComment(), base64=base64)
+    return render_template('hello.html', name=flask_login.current_user.id, allphotos=getBrowsingPhotos(uid), comments=getAllComment(), base64=base64)
 
 
 def getAllComment():
