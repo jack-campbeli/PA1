@@ -53,13 +53,15 @@ CREATE TABLE Photo (
 );
 
 CREATE TABLE Friend (
-  user_id int NOT NULL,
-  friend_id int NOT NULL,
+	user_id int NOT NULL,
+	friend_id int NOT NULL,
 
-  PRIMARY KEY (user_id, friend_id),
-  FOREIGN KEY (user_id) REFERENCES Users(user_id),
-  FOREIGN KEY (friend_id) REFERENCES Users(user_id),
-  CHECK (user_id <> friend_id)
+	PRIMARY KEY (user_id, friend_id),
+	FOREIGN KEY (user_id) 
+		REFERENCES Users(user_id),
+	FOREIGN KEY (friend_id) 
+		REFERENCES Users(user_id),
+	CHECK (user_id <> friend_id)
 );
 
 CREATE TABLE Tag (
@@ -67,7 +69,9 @@ CREATE TABLE Tag (
 	photo_id INT,
     
 	CONSTRAINT tag_pk PRIMARY KEY (tag_name, photo_id),
-	FOREIGN KEY (photo_id) REFERENCES Photo (photo_id) ON DELETE CASCADE
+	FOREIGN KEY (photo_id) 
+		REFERENCES Photo (photo_id) 
+        ON DELETE CASCADE
 );
 
 CREATE TABLE Comment (

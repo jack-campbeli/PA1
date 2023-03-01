@@ -137,10 +137,10 @@ def register():
 @app.route("/photos", methods=['GET'])
 @flask_login.login_required
 def Photo():
-    uid = getUserIdFromEmail(flask_login.current_user.id)
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
     commentList = getAllComment()
 
-    return render_template('hello.html', message='These are your photos', photos=getUsersPhotos(uid), comments=commentList, base64=base64)
+    return render_template('hello.html', message='These are your photos', photos=getUsersPhotos(user_id), comments=commentList, base64=base64)
 
 
 @app.route("/register", methods=['POST'])
@@ -180,10 +180,10 @@ def register_user():
         return flask.redirect(flask.url_for('register'))
 
 
-def getUsersPhotos(uid):
+def getUsersPhotos(user_id):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, photo_id, caption FROM Photo WHERE user_id = '{0}'".format(uid))
+        "SELECT imgdata, photo_id, caption FROM Photo WHERE user_id = '{0}'".format(user_id))
     # return a list of tuples, [(imgdata, pid, caption), ...]
     return cursor.fetchall()
 
@@ -223,31 +223,31 @@ def add_friend():
 
     cursor = conn.cursor()
 
-    uid = getUserIdFromEmail(flask_login.current_user.id)
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
     print(cursor.execute(
-        "INSERT INTO Friend (user_id, friend_id) VALUES ('{0}', '{1}')".format(uid, friend_id)))
+        "INSERT INTO Friend (user_id, friend_id) VALUES ('{0}', '{1}')".format(user_id, friend_id)))
     conn.commit()
 
-    return render_template('friends.html', name=flask_login.current_user.id, friends=getUsersFriends(uid))
+    return render_template('friends.html', name=flask_login.current_user.id, friends=getUsersFriends(user_id))
 
 
 @app.route("/friends", methods=['GET'])
 @flask_login.login_required
 def loadFriend():
-    uid = getUserIdFromEmail(flask_login.current_user.id)
-    friendList = getUsersFriends(uid)
-    fofList = getUsersFriendRecommendation(uid)
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
+    friendList = getUsersFriends(user_id)
+    fofList = getUsersFriendRecommendation(user_id)
     return render_template('friends.html', name=flask_login.current_user.id, friends=friendList, recommended=fofList)
 
 
-def getUsersFriends(uid):
+def getUsersFriends(user_id):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT * FROM Friend WHERE user_id = '{0}'".format(uid))
+        "SELECT * FROM Friend WHERE user_id = '{0}'".format(user_id))
     return cursor.fetchall()
 
 
-def getUsersFriendRecommendation(uid):
+def getUsersFriendRecommendation(user_id):
     cursor = conn.cursor()
     cursor.execute(
         "SELECT fof.friend_id, COUNT(fof.friend_Id) "
@@ -255,7 +255,7 @@ def getUsersFriendRecommendation(uid):
         "WHERE df.friend_id = fof.user_id "
         "AND fof.friend_id <> {0} "
         "AND fof.friend_id NOT IN (SELECT T.friend_id FROM Friend T WHERE T.user_id = {0}) "
-        "GROUP BY fof.friend_id".format(uid))
+        "GROUP BY fof.friend_id".format(user_id))
     return cursor.fetchall()
 
 
@@ -283,17 +283,34 @@ def getAlbumIdFromName(a_name):
 @flask_login.login_required
 def upload_file():
     if request.method == 'POST':
-        uid = getUserIdFromEmail(flask_login.current_user.id)
+        user_id = getUserIdFromEmail(flask_login.current_user.id)
         imgfile = request.files['photo']
-        caption = request.form.get('caption')
-        a_name = request.form.get('a_name')
         imgdata = imgfile.read()
+        
+        caption = request.form.get('caption')
+        
+        tags = request.form.get('tags')
+        tagsList = tags.split(' ')
+        
+        a_name = request.form.get('a_name')
         album_id = getAlbumIdFromName(a_name)
+        
         cursor = conn.cursor()
         cursor.execute(
-            '''INSERT INTO Photo (imgdata, user_id, caption, album_id) VALUES (%s, %s, %s, %s)''', (imgdata, uid, caption, album_id))
+            '''INSERT INTO Photo (imgdata, user_id, caption, album_id) VALUES (%s, %s, %s, %s)''', (imgdata, user_id, caption, album_id))
         conn.commit()
-        return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid), comments=getAllComment(), base64=base64)
+
+        if len(tagsList):
+            cursor.execute(
+                '''SELECT * FROM Photo WHERE user_id = %s AND caption = %s AND album_id = %s''', (user_id, caption, album_id))
+            photo_id = cursor.fetchall()[0][0]
+
+            for i in range(len(tagsList)):
+                cursor.execute(
+                    '''INSERT INTO Tag (tag_name, photo_id) VALUES (%s, %s)''', (tagsList[i], photo_id))
+                conn.commit()
+        
+        return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(user_id), comments=getAllComment(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('upload.html')
@@ -302,12 +319,12 @@ def upload_file():
 # START album creation code
 
 
-def createAlbum(a_name, uid):
+def createAlbum(a_name, user_id):
     creation_date = date.today()
     print(creation_date)
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO Album (a_name, user_id, creation_date) VALUES ('{0}', '{1}', '{2}')".format(a_name, uid, creation_date))
+        "INSERT INTO Album (a_name, user_id, creation_date) VALUES ('{0}', '{1}', '{2}')".format(a_name, user_id, creation_date))
     conn.commit()
 
 
@@ -315,10 +332,10 @@ def createAlbum(a_name, uid):
 @flask_login.login_required
 def create_album():
     if request.method == 'POST':
-        uid = getUserIdFromEmail(flask_login.current_user.id)
+        user_id = getUserIdFromEmail(flask_login.current_user.id)
         a_name = request.form.get('a_name')
-        createAlbum(a_name, uid)
-        return render_template('hello.html', name=flask_login.current_user.id, message='Album created!', photos=getUsersPhotos(uid), comments=getAllComment(), base64=base64)
+        createAlbum(a_name, user_id)
+        return render_template('hello.html', name=flask_login.current_user.id, message='Album created!', photos=getUsersPhotos(user_id), comments=getAllComment(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('albums.html')
@@ -395,7 +412,7 @@ def browse():
 @app.route("/hello", methods=['POST'])
 @flask_login.login_required
 def addComment():
-    uid = getUserIdFromEmail(flask_login.current_user.id)
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
 
     try:
         photoVal = request.form
@@ -408,11 +425,11 @@ def addComment():
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO Comment (user_id, photo_id, date, text) VALUES ('{0}', '{1}', '{2}', '{3}')".format(
-            uid, photo_id, date.today(), text)
+            user_id, photo_id, date.today(), text)
     )
     conn.commit()
 
-    return render_template('hello.html', name=flask_login.current_user.id, allphotos=getBrowsingPhotos(uid), comments=getAllComment(), base64=base64)
+    return render_template('hello.html', name=flask_login.current_user.id, allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), base64=base64)
 
 
 def getAllComment():
