@@ -258,6 +258,35 @@ def getUsersFriendRecommendation(user_id):
         "GROUP BY fof.friend_id".format(user_id))
     return cursor.fetchall()
 
+# START tags code
+@app.route("/view_tags", methods=['POST', 'GET'])
+@flask_login.login_required
+def view_tags():
+    if request.method == 'POST':
+        tags = request.form.get('tags')
+        tagsList = tags.split(' ')
+
+        user_id = getUserIdFromEmail(flask_login.current_user.id)
+        return render_template('hello.html', name=flask_login.current_user.id, message="Here are the tagged photos", photos=getTaggedPhotos(user_id, tagsList), base64=base64)
+    else:
+        user_id = getUserIdFromEmail(flask_login.current_user.id)
+        return render_template('tags.html', name=flask_login.current_user.id)
+
+def getTaggedPhotos(user_id, tagsList):
+    tagString = "','".join(tagsList)
+    
+    cursor = conn.cursor()
+    cursor.execute(
+        '''SELECT p.imgdata, p.photo_id, p.caption 
+            FROM Photo p 
+            JOIN Tag t ON p.photo_id = t.photo_id 
+            WHERE p.user_id = '{0}' AND t.tag_name IN ('{1}') 
+            GROUP BY p.photo_id 
+            HAVING COUNT(DISTINCT t.tag_name) = {2}'''.format(user_id, tagString, len(tagsList)))
+    # return a list of tuples, [(imgdata, pid, caption), ...]
+    return cursor.fetchall()
+# END tags code
+
 
 # START photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML

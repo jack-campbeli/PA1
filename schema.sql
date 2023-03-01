@@ -65,8 +65,8 @@ CREATE TABLE Friend (
 );
 
 CREATE TABLE Tag (
-	tag_name VARCHAR(255) UNIQUE,
-	photo_id INT,
+	tag_name VARCHAR(255) NOT NULL,
+	photo_id INT NOT NULL,
     
 	CONSTRAINT tag_pk PRIMARY KEY (tag_name, photo_id),
 	FOREIGN KEY (photo_id) 
