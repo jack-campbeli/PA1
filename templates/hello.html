@@ -33,6 +33,15 @@
   </ul>    
 {% endif %}
 
+<!-- report the top 10 highest contribution score -->
+{% if topTen %}
+  {% for tt in topTen %}
+    <li>ID: {{tt[0]}}: {{tt[1]}}, {{tt[2]}} <br>
+  {% endfor %}
+{% endif %}
+
+
+
 <!-- Displaying user photos -->
 {% if photos %}
 <h2>Here are your photos</h2>

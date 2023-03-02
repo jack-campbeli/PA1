@@ -259,6 +259,8 @@ def getUsersFriendRecommendation(user_id):
     return cursor.fetchall()
 
 # START tags code
+
+
 @app.route("/view_tags", methods=['POST', 'GET'])
 @flask_login.login_required
 def view_tags():
@@ -272,9 +274,10 @@ def view_tags():
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         return render_template('tags.html', name=flask_login.current_user.id)
 
+
 def getTaggedPhotos(user_id, tagsList):
     tagString = "','".join(tagsList)
-    
+
     cursor = conn.cursor()
     cursor.execute(
         '''SELECT p.imgdata, p.photo_id, p.caption 
@@ -498,11 +501,24 @@ def increaseByOne(id, table_name, row_name, column_name):
     )
     conn.commit()
 
+# helper function: gets the top 10 users with the highest contribution score
+
+
+def getTopTenScore():
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT user_id, first_name, last_name "
+        "FROM Users "
+        "ORDER BY contribution_score DESC "
+        "LIMIT 3; "
+    )
+    return cursor.fetchall()
+
 
 # default page
 @app.route("/", methods=['GET'])
 def hello():
-    return render_template('hello.html', message='Welcome to Photoshare')
+    return render_template('hello.html', message='Welcome to Photoshare', topTen=getTopTenScore())
 
 
 if __name__ == "__main__":
