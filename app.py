@@ -479,7 +479,7 @@ def getAllPhotos():
 def getBrowsingPhotos(user_id):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, first_name, caption, photo_id, likes "
+        "SELECT imgdata, first_name, caption, photo_id "
         "FROM Photo "
         "INNER JOIN Users "
         "ON Photo.user_id = Users.user_id "
