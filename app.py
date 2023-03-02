@@ -339,6 +339,10 @@ def upload_file():
         tagsList = [tag for tag in tags.split(' ') if tag != ""]
 
         a_name = request.form.get('a_name')
+
+        if not albumExists(a_name, user_id):
+            createAlbum(a_name, user_id)
+        
         album_id = getAlbumIdFromName(a_name)
 
         cursor = conn.cursor()
@@ -370,17 +374,23 @@ def upload_file():
 # START album creation code
 def createAlbum(a_name, user_id):
     creation_date = date.today()
-    cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM Album WHERE a_name = %s AND user_id = %s", (a_name, user_id))
-    if cursor.fetchone() is not None:
+    if albumExists(a_name, user_id):
         return False
     else:
+        cursor = conn.cursor()
         cursor.execute(
         "INSERT INTO Album (a_name, user_id, creation_date) VALUES ('{0}', '{1}', '{2}')".format(a_name, user_id, creation_date))
-    conn.commit()
+        conn.commit()
     return True
 
+def albumExists(a_name, user_id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Album WHERE a_name = %s AND user_id = %s", (a_name, user_id))
+    if cursor.fetchone() is not None:
+        return True
+    else:
+        return False
 
 @app.route('/albums', methods=['GET', 'POST'])
 @flask_login.login_required
