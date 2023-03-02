@@ -372,11 +372,16 @@ def upload_file():
 # START album creation code
 def createAlbum(a_name, user_id):
     creation_date = date.today()
-    print(creation_date)
     cursor = conn.cursor()
-    cursor.execute(
+
+    cursor.execute("SELECT * FROM Album WHERE a_name = %s AND user_id = %s", (a_name, user_id))
+    if cursor.fetchone() is not None:
+        return False
+    else:
+        cursor.execute(
         "INSERT INTO Album (a_name, user_id, creation_date) VALUES ('{0}', '{1}', '{2}')".format(a_name, user_id, creation_date))
     conn.commit()
+    return True
 
 
 @app.route('/albums', methods=['GET', 'POST'])
@@ -385,9 +390,12 @@ def create_album():
     if request.method == 'POST':
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         a_name = request.form.get('a_name')
-        createAlbum(a_name, user_id)
+        if createAlbum(a_name, user_id):
+            message = 'Album created!'
+        else:
+            message = 'Album already exists!'
         return render_template('hello.html', name=flask_login.current_user.id, 
-                                message='Album created!', photos=getUsersPhotos(user_id), 
+                                message=message, photos=getUsersPhotos(user_id), 
                                 comments=getAllComment(), userLiked=getAllUserWhoLiked(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
