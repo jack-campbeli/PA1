@@ -267,6 +267,8 @@ def view_tags():
         tags = request.form.get('tags')
         all_photos = request.form.get('all_photos')
         tagsList = tags.split(' ')
+        print("tagsList:")
+        print(tagsList)
 
         if all_photos:
             return render_template('hello.html', name=flask_login.current_user.id, message="Here are all matching photos!", photos=getAllTaggedPhotos(tagsList), base64=base64)
@@ -333,7 +335,8 @@ def upload_file():
         caption = request.form.get('caption')
 
         tags = request.form.get('tags')
-        tagsList = tags.split(' ')
+        # remove empty strings from list
+        tagsList = [tag for tag in tags.split(' ') if tag != ""]
 
         a_name = request.form.get('a_name')
         album_id = getAlbumIdFromName(a_name)
@@ -406,7 +409,6 @@ def getAlbumIdFromName(a_name):
         return result[0]
     else:
         return None
-
 # END album creation code
 
 
