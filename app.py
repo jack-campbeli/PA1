@@ -510,7 +510,7 @@ def getTopTenScore():
         "SELECT user_id, first_name, last_name "
         "FROM Users "
         "ORDER BY contribution_score DESC "
-        "LIMIT 3; "
+        "LIMIT 10; "
     )
     return cursor.fetchall()
 
