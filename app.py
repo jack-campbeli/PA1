@@ -267,6 +267,8 @@ def view_tags():
         tags = request.form.get('tags')
         all_photos = request.form.get('all_photos')
         tagsList = tags.split(' ')
+        print("tagsList:")
+        print(tagsList)
 
         if all_photos:
             return render_template('hello.html', name=flask_login.current_user.id, 
@@ -279,7 +281,13 @@ def view_tags():
                                     photos=getUserTaggedPhotos(user_id, tagsList), countLike=countLikes(), base64=base64) 
     else:
         user_id = getUserIdFromEmail(flask_login.current_user.id)
-        return render_template('tags.html', name=flask_login.current_user.id)
+        return render_template('tags.html', name=flask_login.current_user.id, mostPopularTags=getMostPopularTags())
+
+def getMostPopularTags():
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT tag_name, COUNT(tag_name) FROM Tag GROUP BY tag_name ORDER BY COUNT(tag_name) DESC LIMIT 3")
+    return cursor.fetchall()
 
 def getAllTaggedPhotos(tagsList):
     tagString = "','".join(tagsList)
@@ -320,17 +328,6 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
-def getAlbumIdFromName(a_name):
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT album_id FROM Album WHERE a_name = '{0}'".format(a_name))
-    result = cursor.fetchone()
-    if result is not None:
-        return result[0]
-    else:
-        return None
-
-
 @app.route('/upload', methods=['GET', 'POST'])
 @flask_login.login_required
 def upload_file():
@@ -342,9 +339,14 @@ def upload_file():
         caption = request.form.get('caption')
 
         tags = request.form.get('tags')
-        tagsList = tags.split(' ')
+        # remove empty strings from list
+        tagsList = [tag for tag in tags.split(' ') if tag != ""]
 
         a_name = request.form.get('a_name')
+
+        if not albumExists(a_name, user_id):
+            createAlbum(a_name, user_id)
+        
         album_id = getAlbumIdFromName(a_name)
 
         cursor = conn.cursor()
@@ -377,12 +379,23 @@ def upload_file():
 # START album creation code
 def createAlbum(a_name, user_id):
     creation_date = date.today()
-    print(creation_date)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO Album (a_name, user_id, creation_date) VALUES ('{0}', '{1}', '{2}')".format(a_name, user_id, creation_date))
-    conn.commit()
 
+    if albumExists(a_name, user_id):
+        return False
+    else:
+        cursor = conn.cursor()
+        cursor.execute(
+        "INSERT INTO Album (a_name, user_id, creation_date) VALUES ('{0}', '{1}', '{2}')".format(a_name, user_id, creation_date))
+        conn.commit()
+    return True
+
+def albumExists(a_name, user_id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Album WHERE a_name = %s AND user_id = %s", (a_name, user_id))
+    if cursor.fetchone() is not None:
+        return True
+    else:
+        return False
 
 @app.route('/albums', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -390,14 +403,28 @@ def create_album():
     if request.method == 'POST':
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         a_name = request.form.get('a_name')
-        createAlbum(a_name, user_id)
+        if createAlbum(a_name, user_id):
+            message = 'Album created!'
+        else:
+            message = 'Album already exists!'
         return render_template('hello.html', name=flask_login.current_user.id, 
-                                message='Album created!', photos=getUsersPhotos(user_id), 
+                                message=message, photos=getUsersPhotos(user_id), 
                                 comments=getAllComment(), userLiked=getAllUserWhoLiked(), 
                                 countLike=countLikes(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('albums.html')
+    
+def getAlbumIdFromName(a_name):
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT album_id FROM Album WHERE a_name = %s AND user_id = %s", (a_name, user_id))
+    result = cursor.fetchone()
+    if result is not None:
+        return result[0]
+    else:
+        return None
 # END album creation code
 
 
@@ -409,7 +436,7 @@ def delete_file():
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         photo_id = request.form.get('photo_id')
         a_name = request.form.get('a_name')
-        mess = 'You can\'t delete that!'
+        message = 'You can\'t delete that!'
         cursor = conn.cursor()
         if photo_id:
             cursor.execute(
@@ -417,7 +444,7 @@ def delete_file():
             if len(cursor.fetchall()) != 0:
                 cursor.execute(
                     '''DELETE FROM Photo WHERE photo_id = %s AND user_id = %s''', (photo_id, user_id))
-                mess = 'Photo deleted!'
+                message = 'Photo deleted!'
         elif a_name:
             album_id = getAlbumIdFromName(a_name)
             cursor.execute(
@@ -425,9 +452,9 @@ def delete_file():
             if len(cursor.fetchall()) != 0:
                 cursor.execute(
                     '''DELETE FROM Album WHERE album_id = %s AND user_id = %s''', (album_id, user_id))
-                mess = 'Album deleted!'
+                message = 'Album deleted!'
         conn.commit()
-        return render_template('hello.html', name=flask_login.current_user.id, message=mess, 
+        return render_template('hello.html', name=flask_login.current_user.id, message=message, 
                                 photos=getUsersPhotos(user_id), comments=getAllComment(), 
                                 userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
