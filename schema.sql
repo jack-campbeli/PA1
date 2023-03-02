@@ -90,3 +90,16 @@ CREATE TABLE Comment (
 		REFERENCES Users (user_id) 
         ON DELETE CASCADE
 );
+
+CREATE TABLE Likes (
+	user_id int4,
+    photo_id int4,
+    
+    CONSTRAINT likes_pk PRIMARY KEY (user_id, photo_id),
+    FOREIGN KEY (user_id) 
+		REFERENCES Users (user_id) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (photo_id) 
+		REFERENCES Photo (photo_id) 
+        ON DELETE CASCADE
+)

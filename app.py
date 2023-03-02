@@ -138,7 +138,9 @@ def Photo():
     user_id = getUserIdFromEmail(flask_login.current_user.id)
     commentList = getAllComment()
 
-    return render_template('hello.html', message='These are your photos', photos=getUsersPhotos(user_id), comments=commentList, base64=base64)
+    return render_template('hello.html', message='These are your photos', 
+                            photos=getUsersPhotos(user_id), comments=commentList, 
+                            userLiked=getAllUserWhoLiked(), base64=base64)
 
 
 @app.route("/register", methods=['POST'])
@@ -266,7 +268,9 @@ def view_tags():
         tagsList = tags.split(' ')
 
         user_id = getUserIdFromEmail(flask_login.current_user.id)
-        return render_template('hello.html', name=flask_login.current_user.id, message="Here are the tagged photos", photos=getTaggedPhotos(user_id, tagsList), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, 
+                                message="Here are the tagged photos", 
+                                photos=getTaggedPhotos(user_id, tagsList), base64=base64)
     else:
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         return render_template('tags.html', name=flask_login.current_user.id)
@@ -342,7 +346,9 @@ def upload_file():
                     '''INSERT INTO Tag (tag_name, photo_id) VALUES (%s, %s)''', (tagsList[i], photo_id))
                 conn.commit()
 
-        return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(user_id), comments=getAllComment(), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, 
+                                message='Photo uploaded!', photos=getUsersPhotos(user_id), 
+                                comments=getAllComment(), userLiked=getAllUserWhoLiked(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('upload.html')
@@ -366,7 +372,9 @@ def create_album():
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         a_name = request.form.get('a_name')
         createAlbum(a_name, user_id)
-        return render_template('hello.html', name=flask_login.current_user.id, message='Album created!', photos=getUsersPhotos(user_id), comments=getAllComment(), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, 
+                                message='Album created!', photos=getUsersPhotos(user_id), 
+                                comments=getAllComment(), userLiked=getAllUserWhoLiked(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('albums.html')
@@ -399,7 +407,9 @@ def delete_file():
                     '''DELETE FROM Album WHERE album_id = %s AND user_id = %s''', (album_id, user_id))
                 mess = 'Album deleted!'
         conn.commit()
-        return render_template('hello.html', name=flask_login.current_user.id, message=mess, photos=getUsersPhotos(user_id), comments=getAllComment(), base64=base64)
+        return render_template('hello.html', name=flask_login.current_user.id, message=mess, 
+                                photos=getUsersPhotos(user_id), comments=getAllComment(), 
+                                userLiked=getAllUserWhoLiked(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('delete.html')
@@ -438,7 +448,8 @@ def browse():
         photos = getBrowsingPhotos(user_id)
     else:
         photos = getAllPhotos()
-    return render_template('hello.html', message='Welcome to Photoshare', allphotos=photos, comments=getAllComment(), base64=base64)
+    return render_template('hello.html', message='Welcome to Photoshare', allphotos=photos, 
+                            comments=getAllComment(), userLiked=getAllUserWhoLiked(), base64=base64)
 # END browsing page code
 
 
@@ -465,7 +476,9 @@ def addComment():
     # increase contribution score
     increaseByOne(user_id, "Users", "user_id", "contribution_score")
 
-    return render_template('hello.html', name=flask_login.current_user.id, allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), base64=base64)
+    return render_template('hello.html', name=flask_login.current_user.id, 
+                            allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
+                            userLiked=getAllUserWhoLiked(), base64=base64)
 
 
 def getAllComment():
@@ -486,10 +499,28 @@ def giveALike():
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('hello'))
 
+    # add to the liked table
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO Likes (user_id, photo_id) "
+        "VALUES (%s, %s) ", (user_id, photo_id)
+    )
+    conn.commit()
+
+    # increase the number of like by 1
     increaseByOne(photo_id, 'photo', 'photo_id', 'likes')
 
     return render_template('hello.html', name=flask_login.current_user.id,
-                           allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), base64=base64)
+                           allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
+                           userLiked=getAllUserWhoLiked(), base64=base64)
+
+def getAllUserWhoLiked():
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT Users.user_id, first_name, last_name, photo_id "
+        "FROM Users INNER JOIN Likes ON Users.user_id = Likes.user_id"
+    )
+    return cursor.fetchall()
 
 # helper function: increase the value of the cell by 1 given
 #                   the table name, column name, and when row name = id

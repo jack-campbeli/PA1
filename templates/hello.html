@@ -34,6 +34,7 @@
 {% endif %}
 
 <!-- report the top 10 highest contribution score -->
+<h3> Top 10 Contributors </h3>
 {% if topTen %}
   {% for tt in topTen %}
     <li>ID: {{tt[0]}}: {{tt[1]}}, {{tt[2]}} <br>
@@ -54,6 +55,17 @@
         
         <!-- load likes -->
         Liked: {{photo[3]}}
+        <br>
+        Users that Liked Your Photo:
+        {% if userLiked %}
+          <ul>
+          {% for ul in userLiked %}
+            {% if ul[3] == photo[1] %}
+              <li>ID {{ul[0]}}: {{ul[1]}}, {{ul[2]}}</li>
+            {% endif %}
+          {% endfor %}
+          </ul>
+        {% endif %}
 
         <!-- load comments -->
         <h3>Comment: </h3>
@@ -93,6 +105,17 @@
         <form method="post" action="{{ url_for('giveALike') }}">
           <input type="submit" name = "{{photo[3]}}" value="Like"/> {{photo[4]}}
         </form>
+
+        Users that Liked This Photo:
+        {% if userLiked %}
+          <ul>
+          {% for ul in userLiked %}
+            {% if ul[3] == photo[3] %}
+              <li>ID {{ul[0]}}: {{ul[1]}}, {{ul[2]}}</li>
+            {% endif %}
+          {% endfor %}
+          </ul>
+        {% endif %}
 
         
         <!-- Comment -->
