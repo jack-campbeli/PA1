@@ -85,7 +85,6 @@ def new_page_function():
 	return new_page_html
 '''
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if flask.request.method == 'GET':
@@ -127,7 +126,6 @@ def unauthorized_handler():
     return render_template('unauth.html')
 
 # you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
-
 
 @app.route("/register", methods=['GET'])
 def register():
@@ -258,9 +256,8 @@ def getUsersFriendRecommendation(user_id):
         "GROUP BY fof.friend_id".format(user_id))
     return cursor.fetchall()
 
+
 # START tags code
-
-
 @app.route("/view_tags", methods=['POST', 'GET'])
 @flask_login.login_required
 def view_tags():
@@ -478,6 +475,7 @@ def getAllComment():
 
 
 @app.route("/photos", methods=['POST'])
+# does not need to be logged in
 def giveALike():
     user_id = getUserIdFromEmail(flask_login.current_user.id)
 
@@ -493,7 +491,8 @@ def giveALike():
     return render_template('hello.html', name=flask_login.current_user.id,
                            allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), base64=base64)
 
-
+# helper function: increase the value of the cell by 1 given
+#                   the table name, column name, and when row name = id
 def increaseByOne(id, table_name, row_name, column_name):
     cursor = conn.cursor()
     cursor.execute("UPDATE {1} SET {3} = {3} + 1 WHERE {2} = '{0}'".format(
@@ -502,8 +501,6 @@ def increaseByOne(id, table_name, row_name, column_name):
     conn.commit()
 
 # helper function: gets the top 10 users with the highest contribution score
-
-
 def getTopTenScore():
     cursor = conn.cursor()
     cursor.execute(
