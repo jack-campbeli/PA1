@@ -329,6 +329,9 @@ def upload_file():
             '''INSERT INTO Photo (imgdata, user_id, caption, album_id) VALUES (%s, %s, %s, %s)''', (imgdata, user_id, caption, album_id))
         conn.commit()
 
+        # increase contribution score
+        increaseByOne(user_id, "Users", "user_id", "contribution_score")
+
         if len(tagsList):
             cursor.execute(
                 '''SELECT * FROM Photo WHERE user_id = %s AND caption = %s AND album_id = %s''', (user_id, caption, album_id))
@@ -458,6 +461,9 @@ def addComment():
             user_id, photo_id, date.today(), text)
     )
     conn.commit()
+
+    # increase contribution score
+    increaseByOne(user_id, "Users", "user_id", "contribution_score")
 
     return render_template('hello.html', name=flask_login.current_user.id, allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), base64=base64)
 
