@@ -263,16 +263,32 @@ def getUsersFriendRecommendation(user_id):
 def view_tags():
     if request.method == 'POST':
         tags = request.form.get('tags')
+        all_photos = request.form.get('all_photos')
         tagsList = tags.split(' ')
-
-        user_id = getUserIdFromEmail(flask_login.current_user.id)
-        return render_template('hello.html', name=flask_login.current_user.id, message="Here are the tagged photos", photos=getTaggedPhotos(user_id, tagsList), base64=base64)
+        if all_photos:
+            return render_template('hello.html', name=flask_login.current_user.id, message="Here are all matching photos!", photos=getAllTaggedPhotos(tagsList), base64=base64)
+        else:    
+            user_id = getUserIdFromEmail(flask_login.current_user.id)
+            return render_template('hello.html', name=flask_login.current_user.id, message="Here are your matching photos!", photos=getUserTaggedPhotos(user_id, tagsList), base64=base64) 
     else:
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         return render_template('tags.html', name=flask_login.current_user.id)
 
+def getAllTaggedPhotos(tagsList):
+    tagString = "','".join(tagsList)
 
-def getTaggedPhotos(user_id, tagsList):
+    cursor = conn.cursor()
+    cursor.execute(
+        '''SELECT p.imgdata, p.photo_id, p.caption 
+            FROM Photo p 
+            JOIN Tag t ON p.photo_id = t.photo_id 
+            WHERE t.tag_name IN ('{0}') 
+            GROUP BY p.photo_id 
+            HAVING COUNT(DISTINCT t.tag_name) = {1}'''.format(tagString, len(tagsList)))
+    # return a list of tuples, [(imgdata, pid, caption), ...]
+    return cursor.fetchall()
+
+def getUserTaggedPhotos(user_id, tagsList):
     tagString = "','".join(tagsList)
 
     cursor = conn.cursor()
