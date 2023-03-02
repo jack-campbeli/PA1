@@ -183,7 +183,7 @@ def register_user():
 def getUsersPhotos(user_id):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, photo_id, caption FROM Photo WHERE user_id = '{0}'".format(user_id))
+        "SELECT imgdata, photo_id, caption, likes FROM Photo WHERE user_id = '{0}'".format(user_id))
     # return a list of tuples, [(imgdata, pid, caption), ...]
     return cursor.fetchall()
 
@@ -286,15 +286,15 @@ def upload_file():
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         imgfile = request.files['photo']
         imgdata = imgfile.read()
-        
+
         caption = request.form.get('caption')
-        
+
         tags = request.form.get('tags')
         tagsList = tags.split(' ')
-        
+
         a_name = request.form.get('a_name')
         album_id = getAlbumIdFromName(a_name)
-        
+
         cursor = conn.cursor()
         cursor.execute(
             '''INSERT INTO Photo (imgdata, user_id, caption, album_id) VALUES (%s, %s, %s, %s)''', (imgdata, user_id, caption, album_id))
@@ -309,16 +309,15 @@ def upload_file():
                 cursor.execute(
                     '''INSERT INTO Tag (tag_name, photo_id) VALUES (%s, %s)''', (tagsList[i], photo_id))
                 conn.commit()
-        
+
         return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(user_id), comments=getAllComment(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('upload.html')
 # END photo uploading code
 
+
 # START album creation code
-
-
 def createAlbum(a_name, user_id):
     creation_date = date.today()
     print(creation_date)
@@ -350,20 +349,22 @@ def delete_file():
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         photo_id = request.form.get('photo_id')
         a_name = request.form.get('a_name')
-        mess ='You can\'t delete that!'
+        mess = 'You can\'t delete that!'
         cursor = conn.cursor()
         if photo_id:
-            cursor.execute('''SELECT * FROM Photo WHERE photo_id = %s AND user_id = %s''', (photo_id, user_id))
+            cursor.execute(
+                '''SELECT * FROM Photo WHERE photo_id = %s AND user_id = %s''', (photo_id, user_id))
             if len(cursor.fetchall()) != 0:
                 cursor.execute(
-                '''DELETE FROM Photo WHERE photo_id = %s AND user_id = %s''', (photo_id, user_id))
+                    '''DELETE FROM Photo WHERE photo_id = %s AND user_id = %s''', (photo_id, user_id))
                 mess = 'Photo deleted!'
         elif a_name:
             album_id = getAlbumIdFromName(a_name)
-            cursor.execute('''SELECT * FROM Album WHERE album_id = %s AND user_id = %s''', (album_id, user_id))
+            cursor.execute(
+                '''SELECT * FROM Album WHERE album_id = %s AND user_id = %s''', (album_id, user_id))
             if len(cursor.fetchall()) != 0:
                 cursor.execute(
-                    '''DELETE FROM Album WHERE album_id = %s AND user_id = %s''', (album_id, user_id))           
+                    '''DELETE FROM Album WHERE album_id = %s AND user_id = %s''', (album_id, user_id))
                 mess = 'Album deleted!'
         conn.commit()
         return render_template('hello.html', name=flask_login.current_user.id, message=mess, photos=getUsersPhotos(user_id), comments=getAllComment(), base64=base64)
@@ -389,7 +390,7 @@ def getAllPhotos():
 def getBrowsingPhotos(user_id):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, first_name, caption, photo_id "
+        "SELECT imgdata, first_name, caption, photo_id, likes "
         "FROM Photo "
         "INNER JOIN Users "
         "ON Photo.user_id = Users.user_id "
@@ -436,6 +437,31 @@ def getAllComment():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Comment")
     return cursor.fetchall()
+
+
+@app.route("/photos", methods=['POST'])
+def giveALike():
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
+
+    try:
+        photoVal = request.form
+        photo_id = list(photoVal.to_dict().keys())[0]
+    except:
+        print("couldn't find all tokens")
+        return flask.redirect(flask.url_for('hello'))
+
+    increaseByOne(photo_id, 'photo', 'photo_id', 'likes')
+
+    return render_template('hello.html', name=flask_login.current_user.id,
+                           allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), base64=base64)
+
+
+def increaseByOne(id, table_name, row_name, column_name):
+    cursor = conn.cursor()
+    cursor.execute("UPDATE {1} SET {3} = {3} + 1 WHERE {2} = '{0}'".format(
+        id, table_name, row_name, column_name)
+    )
+    conn.commit()
 
 
 # default page
