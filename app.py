@@ -330,9 +330,8 @@ def upload_file():
         conn.commit()
 
         if len(tagsList):
-            cursor.execute(
-                '''SELECT * FROM Photo WHERE user_id = %s AND caption = %s AND album_id = %s''', (user_id, caption, album_id))
-            photo_id = cursor.fetchall()[0][0]
+            
+            photo_id = cursor.lastrowid
 
             for i in range(len(tagsList)):
                 cursor.execute(
