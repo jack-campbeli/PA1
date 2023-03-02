@@ -140,7 +140,7 @@ def Photo():
 
     return render_template('hello.html', message='These are your photos', 
                             photos=getUsersPhotos(user_id), comments=commentList, 
-                            userLiked=getAllUserWhoLiked(), base64=base64)
+                            userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
 
 
 @app.route("/register", methods=['POST'])
@@ -269,10 +269,14 @@ def view_tags():
         tagsList = tags.split(' ')
 
         if all_photos:
-            return render_template('hello.html', name=flask_login.current_user.id, message="Here are all matching photos!", photos=getAllTaggedPhotos(tagsList), base64=base64)
+            return render_template('hello.html', name=flask_login.current_user.id, 
+                                    message="Here are all matching photos!", 
+                                    photos=getAllTaggedPhotos(tagsList), countLike=countLikes(), base64=base64)
         else:    
             user_id = getUserIdFromEmail(flask_login.current_user.id)
-            return render_template('hello.html', name=flask_login.current_user.id, message="Here are your matching photos!", photos=getUserTaggedPhotos(user_id, tagsList), base64=base64) 
+            return render_template('hello.html', name=flask_login.current_user.id, 
+                                    message="Here are your matching photos!", 
+                                    photos=getUserTaggedPhotos(user_id, tagsList), countLike=countLikes(), base64=base64) 
     else:
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         return render_template('tags.html', name=flask_login.current_user.id)
@@ -362,7 +366,8 @@ def upload_file():
 
         return render_template('hello.html', name=flask_login.current_user.id, 
                                 message='Photo uploaded!', photos=getUsersPhotos(user_id), 
-                                comments=getAllComment(), userLiked=getAllUserWhoLiked(), base64=base64)
+                                comments=getAllComment(), userLiked=getAllUserWhoLiked(), 
+                                countLike=countLikes(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('upload.html')
@@ -388,7 +393,8 @@ def create_album():
         createAlbum(a_name, user_id)
         return render_template('hello.html', name=flask_login.current_user.id, 
                                 message='Album created!', photos=getUsersPhotos(user_id), 
-                                comments=getAllComment(), userLiked=getAllUserWhoLiked(), base64=base64)
+                                comments=getAllComment(), userLiked=getAllUserWhoLiked(), 
+                                countLike=countLikes(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('albums.html')
@@ -423,7 +429,7 @@ def delete_file():
         conn.commit()
         return render_template('hello.html', name=flask_login.current_user.id, message=mess, 
                                 photos=getUsersPhotos(user_id), comments=getAllComment(), 
-                                userLiked=getAllUserWhoLiked(), base64=base64)
+                                userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('delete.html')
@@ -463,7 +469,8 @@ def browse():
     else:
         photos = getAllPhotos()
     return render_template('hello.html', message='Welcome to Photoshare', allphotos=photos, 
-                            comments=getAllComment(), userLiked=getAllUserWhoLiked(), base64=base64)
+                            comments=getAllComment(), userLiked=getAllUserWhoLiked(), 
+                            countLike=countLikes(), base64=base64)
 # END browsing page code
 
 
@@ -492,7 +499,7 @@ def addComment():
 
     return render_template('hello.html', name=flask_login.current_user.id, 
                             allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
-                            userLiked=getAllUserWhoLiked(), base64=base64)
+                            userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
 
 
 def getAllComment():
@@ -526,13 +533,22 @@ def giveALike():
 
     return render_template('hello.html', name=flask_login.current_user.id,
                            allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
-                           userLiked=getAllUserWhoLiked(), base64=base64)
+                           userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
 
 def getAllUserWhoLiked():
     cursor = conn.cursor()
     cursor.execute(
         "SELECT Users.user_id, first_name, last_name, photo_id "
         "FROM Users INNER JOIN Likes ON Users.user_id = Likes.user_id"
+    )
+    return cursor.fetchall()
+
+def countLikes():
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT Likes.photo_id, COUNT(Likes.user_id) "
+        "FROM Likes "
+        "GROUP BY Likes.photo_id"
     )
     return cursor.fetchall()
 
