@@ -33,6 +33,15 @@
   </ul>    
 {% endif %}
 
+<!-- report the top 10 highest contribution score -->
+{% if topTen %}
+  {% for tt in topTen %}
+    <li>ID: {{tt[0]}}: {{tt[1]}}, {{tt[2]}} <br>
+  {% endfor %}
+{% endif %}
+
+
+
 <!-- Displaying user photos -->
 {% if photos %}
 <h2>Here are your photos</h2>
@@ -42,6 +51,9 @@
         <li>Caption: {{photo[2]}}<br>
         <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}' 
             width="400" height=auto/></li>
+        
+        <!-- load likes -->
+        Liked: {{photo[3]}}
 
         <!-- load comments -->
         <h3>Comment: </h3>
@@ -58,7 +70,7 @@
         </ul>
         {% endif %}
 
-
+        <br> <br>
     {% endfor %}
     </ul>
 {% endif %}
@@ -76,12 +88,20 @@
         <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'
             width="450" height=auto/></li>
 
+
+        <!-- Like -->
+        <form method="post" action="{{ url_for('giveALike') }}">
+          <input type="submit" name = "{{photo[3]}}" value="Like"/> {{photo[4]}}
+        </form>
+
+        
+        <!-- Comment -->
         <h3>Comment: </h3>
         <form method="post" action="{{ url_for('addComment') }}">
           <label for="comment">Enter your comment:</label>
           <input type="comment" name="{{photo[3]}}"/><br />
           
-          <input type="submit" value="Comment"/>
+          <input type="submit" value="Comment" name="like"/>
         </form>
 
         <!-- load comments -->
@@ -98,6 +118,7 @@
         </ul>
         {% endif %}
 
+        <br> <br>
     {% endfor %}
     </ul>
 {% endif %}

@@ -41,6 +41,7 @@ CREATE TABLE Photo (
 	user_id int4,
 	imgdata longblob,
 	caption VARCHAR(255),
+    likes int4 DEFAULT 0,
 	INDEX upid_idx (user_id),
 	CONSTRAINT photo_pk PRIMARY KEY (photo_id),
 
