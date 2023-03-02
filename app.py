@@ -275,7 +275,13 @@ def view_tags():
             return render_template('hello.html', name=flask_login.current_user.id, message="Here are your matching photos!", photos=getUserTaggedPhotos(user_id, tagsList), base64=base64) 
     else:
         user_id = getUserIdFromEmail(flask_login.current_user.id)
-        return render_template('tags.html', name=flask_login.current_user.id)
+        return render_template('tags.html', name=flask_login.current_user.id, mostPopularTags=getMostPopularTags())
+
+def getMostPopularTags():
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT tag_name, COUNT(tag_name) FROM Tag GROUP BY tag_name ORDER BY COUNT(tag_name) DESC LIMIT 3")
+    return cursor.fetchall()
 
 def getAllTaggedPhotos(tagsList):
     tagString = "','".join(tagsList)
@@ -314,17 +320,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-
-def getAlbumIdFromName(a_name):
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT album_id FROM Album WHERE a_name = '{0}'".format(a_name))
-    result = cursor.fetchone()
-    if result is not None:
-        return result[0]
-    else:
-        return None
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -400,6 +395,18 @@ def create_album():
     # The method is GET so we return a HTML form to upload the a photo.
     else:
         return render_template('albums.html')
+    
+def getAlbumIdFromName(a_name):
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT album_id FROM Album WHERE a_name = %s AND user_id = %s", (a_name, user_id))
+    result = cursor.fetchone()
+    if result is not None:
+        return result[0]
+    else:
+        return None
+
 # END album creation code
 
 
@@ -411,7 +418,7 @@ def delete_file():
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         photo_id = request.form.get('photo_id')
         a_name = request.form.get('a_name')
-        mess = 'You can\'t delete that!'
+        message = 'You can\'t delete that!'
         cursor = conn.cursor()
         if photo_id:
             cursor.execute(
@@ -419,7 +426,7 @@ def delete_file():
             if len(cursor.fetchall()) != 0:
                 cursor.execute(
                     '''DELETE FROM Photo WHERE photo_id = %s AND user_id = %s''', (photo_id, user_id))
-                mess = 'Photo deleted!'
+                message = 'Photo deleted!'
         elif a_name:
             album_id = getAlbumIdFromName(a_name)
             cursor.execute(
@@ -427,9 +434,9 @@ def delete_file():
             if len(cursor.fetchall()) != 0:
                 cursor.execute(
                     '''DELETE FROM Album WHERE album_id = %s AND user_id = %s''', (album_id, user_id))
-                mess = 'Album deleted!'
+                message = 'Album deleted!'
         conn.commit()
-        return render_template('hello.html', name=flask_login.current_user.id, message=mess, 
+        return render_template('hello.html', name=flask_login.current_user.id, message=message, 
                                 photos=getUsersPhotos(user_id), comments=getAllComment(), 
                                 userLiked=getAllUserWhoLiked(), base64=base64)
     # The method is GET so we return a HTML form to upload the a photo.
