@@ -121,7 +121,7 @@ def login():
 def logout():
     name=flask_login.current_user.id
     flask_login.logout_user()
-    return render_template('hello.html', message='Logged out (' + name + ')')
+    return render_template('hello.html', message='Logged out')
 
 
 @login_manager.unauthorized_handler
