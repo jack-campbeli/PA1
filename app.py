@@ -267,7 +267,6 @@ def getUsersFriendRecommendation(user_id):
 
 # START tags code
 @app.route("/view_tags", methods=['POST', 'GET'])
-@flask_login.login_required
 def view_tags():
     if request.method == 'POST':
         tags = request.form.get('tags')
@@ -276,8 +275,8 @@ def view_tags():
         print("tagsList:")
         print(tagsList)
 
-        if all_photos:
-            return render_template('hello.html', name=flask_login.current_user.id, 
+        if all_photos or not flask_login.current_user.is_authenticated:
+            return render_template('hello.html', 
                                     message="Here are all matching photos!", 
                                     photos=getAllTaggedPhotos(tagsList), countLike=countLikes(), base64=base64)
         else:    
@@ -286,8 +285,7 @@ def view_tags():
                                     message="Here are your matching photos!", 
                                     photos=getUserTaggedPhotos(user_id, tagsList), countLike=countLikes(), base64=base64) 
     else:
-        user_id = getUserIdFromEmail(flask_login.current_user.id)
-        return render_template('tags.html', name=flask_login.current_user.id, mostPopularTags=getMostPopularTags())
+        return render_template('tags.html', mostPopularTags=getMostPopularTags())
 
 def getMostPopularTags():
     cursor = conn.cursor()
