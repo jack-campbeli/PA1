@@ -185,7 +185,7 @@ def register_user():
 def getUsersPhotos(user_id):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, photo_id, caption, likes FROM Photo WHERE user_id = '{0}'".format(user_id))
+        "SELECT imgdata, photo_id, caption FROM Photo WHERE user_id = '{0}'".format(user_id))
     # return a list of tuples, [(imgdata, pid, caption), ...]
     return cursor.fetchall()
 
