@@ -121,7 +121,8 @@ def login():
 def logout():
     name=flask_login.current_user.id
     flask_login.logout_user()
-    return render_template('hello.html', message='Logged out (' + name + ')')
+    return render_template('hello.html', message='Logged out (' + name + ')',
+                            topTen=getTopTenScore())
 
 
 @login_manager.unauthorized_handler
@@ -177,7 +178,8 @@ def register_user():
         user.hometown = hometown
         user.gender = gender
         flask_login.login_user(user)
-        return render_template('hello.html', name=email, message='Account Created!')
+        return render_template('hello.html', name=email, message='Account Created!', 
+                                topTen=getTopTenScore())
     else:
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('register'))
@@ -212,7 +214,8 @@ def isEmailUnique(email):
 @app.route('/profile')
 @flask_login.login_required
 def protected():
-    return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
+    return render_template('hello.html', name=flask_login.current_user.id, 
+                            message="Here's your profile", topTen=getTopTenScore())
 
 
 @app.route("/friends", methods=['POST'])
@@ -523,7 +526,7 @@ def delete_file():
 def getAllPhotos():
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT imgdata, first_name, caption \n"
+        "SELECT imgdata, first_name, caption, photo_id \n"
         "FROM Photo \n"
         "INNER JOIN Users \n"
         "ON Photo.user_id = Users.user_id;")
@@ -594,8 +597,11 @@ def getAllComment():
 @app.route("/photos", methods=['POST'])
 # does not need to be logged in
 def giveALike():
-    user_id = getUserIdFromEmail(flask_login.current_user.id)
-
+    if flask_login.current_user.is_authenticated:
+        user_id = getUserIdFromEmail(flask_login.current_user.id)
+    else:
+        user_id = None
+       
     try:
         photoVal = request.form
         photo_id = list(photoVal.to_dict().keys())[0]
@@ -610,6 +616,8 @@ def giveALike():
         "VALUES (%s, %s) ", (user_id, photo_id)
     )
     conn.commit()
+
+    print("hello")
 
     return render_template('hello.html', name=flask_login.current_user.id,
                            allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
