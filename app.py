@@ -599,11 +599,35 @@ def getTopTenScore():
     )
     return cursor.fetchall()
 
+# @app.route("/search", methods=['GET', 'POST'])
+def searchComment(text):
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT u.user_id, u.first_name, u.last_name "
+        "FROM Users u, (SELECT user_id, COUNT(text) "
+            "FROM Comment c "
+            "WHERE c.text = %s "     
+            "GROUP BY c.user_id "
+            "ORDER BY COUNT(text) desc) AS count "
+        "WHERE u.user_id = count.user_id ", (text)
+    )
+    return cursor.fetchall()
 
 # default page
-@app.route("/", methods=['GET'])
+@app.route("/", methods=['GET', 'POST'])
 def hello():
-    return render_template('hello.html', message='Welcome to Photoshare', topTen=getTopTenScore())
+        try:
+            text = request.form.get('search')
+        except:
+            print("couldn't find all tokens")
+            return flask.redirect(flask.url_for('hello'))
+
+        if text == None:
+            return render_template('hello.html')
+
+        return render_template('hello.html', message='Welcome to Photoshare', 
+                                topTen=getTopTenScore(), 
+                                relatedC=text, orderedComment=searchComment(text))
 
 
 if __name__ == "__main__":

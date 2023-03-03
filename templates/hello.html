@@ -41,6 +41,23 @@
   {% endfor %}
 {% endif %}
 
+
+<!-- search comment -->
+<h3>Search Comment</h3>
+<form method="post" action="{{ url_for('hello') }}">
+    <input type="search" name="search" /><br/>
+    <input type="submit" value="Submit"/>
+</form>
+
+<!-- Load Related -->
+{% if relatedC %}
+  <h3> Related Comment: {{relatedC}} </h3>
+  {% for oc in orderedComment %}
+    <li>ID: {{oc[0]}}: {{oc[1]}}, {{oc[2]}} <br>
+  {% endfor %}
+{% endif %}
+
+
 <!-- Displaying user photos -->
 {% if photos %}
 <h2>Here are your photos</h2>
