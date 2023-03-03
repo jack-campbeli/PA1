@@ -342,7 +342,7 @@ def getOtherTaggedPhotos(user_id, tagsList):
 @flask_login.login_required
 def discover():
     user_id = getUserIdFromEmail(flask_login.current_user.id)
-    return render_template('discover.html', name=flask_login.current_user.id, photos=youMayAlsoLike(user_id), countLike=countLikes(), base64=base64)
+    return render_template('discover.html', name=flask_login.current_user.id, photos=youMayAlsoLike(user_id), comments=getAllComment(), countLike=countLikes(), base64=base64)
 
 # returns a list of lists of tags as strings
 def powerset(tags):
@@ -569,6 +569,7 @@ def addComment():
         photoVal = request.form
         photo_id = list(photoVal.to_dict().keys())[0]
         text = list(photoVal.to_dict().values())[0]
+        currentLoc = request.form.get('source')
     except:
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('hello'))
@@ -583,7 +584,10 @@ def addComment():
     # increase contribution score
     increaseByOne(user_id, "Users", "user_id", "contribution_score")
 
-    return render_template('hello.html', name=flask_login.current_user.id, 
+    if currentLoc == "discover":
+        return render_template('discover.html', name=flask_login.current_user.id, photos=youMayAlsoLike(user_id), comments=getAllComment(), countLike=countLikes(), base64=base64)
+    else:
+        return render_template('hello.html', name=flask_login.current_user.id, 
                             allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
                             userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
 
@@ -605,6 +609,7 @@ def giveALike():
     try:
         photoVal = request.form
         photo_id = list(photoVal.to_dict().keys())[0]
+        currentLoc = request.form.get('source')
     except:
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('hello'))
@@ -617,9 +622,10 @@ def giveALike():
     )
     conn.commit()
 
-    print("hello")
-
-    return render_template('hello.html', name=flask_login.current_user.id,
+    if currentLoc == "discover":
+        return render_template('discover.html', name=flask_login.current_user.id, photos=youMayAlsoLike(user_id), comments=getAllComment(), countLike=countLikes(), base64=base64)
+    else:
+        return render_template('hello.html', name=flask_login.current_user.id,
                            allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
                            userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
 

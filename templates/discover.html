@@ -30,15 +30,16 @@
 
                 <!-- Like -->
                 <form method="post" action="{{ url_for('giveALike') }}">
-                <input type="submit" name = "{{photo[1]}}" value="Like"/> 
-                {% if countLike %}
-                    {% for cl in countLike %}
-                    {% if cl[0] == photo[1] %}
-                        {{cl[1]}}
-                    {% endif %}
-                    {% endfor %}
+                    <input type="submit" name = "{{photo[1]}}" value="Like"/> 
+                    <input type="hidden" name="source", value="discover">
+                    {% if countLike %}
+                        {% for cl in countLike %}
+                        {% if cl[0] == photo[1] %}
+                            {{cl[1]}}
+                        {% endif %}
+                        {% endfor %}
 
-                {% endif %}
+                    {% endif %}
                 </form>
 
                 Users that Liked This Photo:
@@ -60,6 +61,7 @@
                 <input type="comment" name="{{photo[1]}}"/><br />
                 
                 <input type="submit" value="Comment" name="like"/>
+                <input type="hidden" name="source", value="discover">
                 </form>
 
                 <!-- load comments -->
