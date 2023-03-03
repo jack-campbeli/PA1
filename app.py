@@ -549,6 +549,7 @@ def browse():
         photos = getBrowsingPhotos(user_id)
     else:
         photos = getAllPhotos()
+
     return render_template('hello.html', message='Welcome to Photoshare', allphotos=photos, 
                             comments=getAllComment(), userLiked=getAllUserWhoLiked(), 
                             countLike=countLikes(), base64=base64)
@@ -556,9 +557,12 @@ def browse():
 
 
 @app.route("/hello", methods=['POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def addComment():
-    user_id = getUserIdFromEmail(flask_login.current_user.id)
+    if flask_login.current_user.is_authenticated:
+        user_id = getUserIdFromEmail(flask_login.current_user.id)
+    else:
+        user_id = 1
 
     try:
         photoVal = request.form
@@ -582,9 +586,14 @@ def addComment():
     if currentLoc == "discover":
         return render_template('discover.html', name=flask_login.current_user.id, photos=youMayAlsoLike(user_id), comments=getAllComment(), countLike=countLikes(), base64=base64)
     else:
-        return render_template('hello.html', name=flask_login.current_user.id, 
-                            allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
-                            userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
+        if user_id == 1:
+            return render_template('hello.html', name="guest",
+                           allphotos=getAllPhotos(), comments=getAllComment(), 
+                           userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
+        else:
+            return render_template('hello.html', name=flask_login.current_user.id,
+                           allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
+                           userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
 
 
 def getAllComment():
@@ -599,7 +608,7 @@ def giveALike():
     if flask_login.current_user.is_authenticated:
         user_id = getUserIdFromEmail(flask_login.current_user.id)
     else:
-        user_id = None
+        user_id = 1
        
     try:
         photoVal = request.form
@@ -659,6 +668,7 @@ def getTopTenScore():
     cursor.execute(
         "SELECT user_id, first_name, last_name "
         "FROM Users "
+        "WHERE first_name <> 'guest' "
         "ORDER BY contribution_score DESC "
         "LIMIT 10; "
     )
@@ -680,19 +690,19 @@ def searchComment(text):
 # default page
 @app.route("/", methods=['GET', 'POST'])
 def hello():
-        try:
-            text = request.form.get('search')
-        except:
-            print("couldn't find all tokens")
-            return flask.redirect(flask.url_for('hello'))
+    try:
+        text = request.form.get('search')
+    except:
+        print("couldn't find all tokens")
+        return flask.redirect(flask.url_for('hello'))
 
-        if text == None:
-            return render_template('hello.html', message='Welcome to Photoshare', 
-                                    topTen=getTopTenScore())
-
+    if text == None:
         return render_template('hello.html', message='Welcome to Photoshare', 
-                                topTen=getTopTenScore(), 
-                                relatedC=text, orderedComment=searchComment(text))
+                                topTen=getTopTenScore())
+
+    return render_template('hello.html', message='Welcome to Photoshare', 
+                            topTen=getTopTenScore(), 
+                            relatedC=text, orderedComment=searchComment(text))
 
 
 if __name__ == "__main__":

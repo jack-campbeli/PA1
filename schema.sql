@@ -102,4 +102,7 @@ CREATE TABLE Likes (
     FOREIGN KEY (photo_id) 
 		REFERENCES Photo (photo_id) 
         ON DELETE CASCADE
-)
+);
+
+-- create guest account
+INSERT INTO Users (first_name, last_name, dob, email, password) VALUES ('guest', 'guest', '0001-01-01', 'guest@guest', 'guest');
