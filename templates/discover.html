@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!-- author ben lawson (balawson@bu.edu) -->
+<head>
+    <title>Discover on Photoshare!</title>
+</head>
+    <body>
+        <div class="title">
+            <h1>We think you'll like these</h1>
+        </div>
+
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/browse">Browse</a> </li>
+            <li><a href="/photos">Your Photos</a> </li>
+            <li><a href="/albums">Create an album</a> </li>
+            <li><a href="/view_tags">Tags</a> </li>
+            <li><a href="/upload">Upload a photo</a> </li>
+            <li><a href="/delete">Delete</a> </li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+
+        <!-- Displaying Discover Page Photos -->
+        {% if photos %}
+            {% for photo in photos %}
+                <li>User: {{photo[1]}}<br>
+                <li>Caption: {{photo[2]}}<br>
+                <li>Picture_ID: {{photo[3]}}<br> <!-- TESTING -->
+                <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'
+                    width="450" height=auto/></li>
+
+
+                <!-- Like -->
+                <form method="post" action="{{ url_for('giveALike') }}">
+                <input type="submit" name = "{{photo[3]}}" value="Like"/> 
+                {% if countLike %}
+                    {% for cl in countLike %}
+                    {% if cl[0] == photo[3] %}
+                        {{cl[1]}}
+                    {% endif %}
+                    {% endfor %}
+
+                {% endif %}
+                </form>
+
+                Users that Liked This Photo:
+                {% if userLiked %}
+                <ul>
+                {% for ul in userLiked %}
+                    {% if ul[3] == photo[3] %}
+                    <li>ID {{ul[0]}}: {{ul[1]}}, {{ul[2]}}</li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+                {% endif %}
+
+                
+                <!-- Comment -->
+                <h3>Comment: </h3>
+                <form method="post" action="{{ url_for('addComment') }}">
+                <label for="comment">Enter your comment:</label>
+                <input type="comment" name="{{photo[3]}}"/><br />
+                
+                <input type="submit" value="Comment" name="like"/>
+                </form>
+
+                <!-- load comments -->
+                {% if comments %}
+                <ul>
+                {% for comment in comments %}
+                    {% if photo[3] == comment[2] %}
+                    <li>UID: {{comment[1]}}<br>
+                    <li>PID: {{comment[2]}}<br>
+                    <li>Text: {{comment[4]}}<br>
+                    <br>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+                {% endif %}
+
+                <br> <br>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </body>

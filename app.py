@@ -13,6 +13,7 @@ import flask
 from flask import Flask, Response, request, render_template, redirect, url_for
 from flaskext.mysql import MySQL
 import flask_login
+from itertools import chain, combinations
 
 from datetime import date
 
@@ -302,7 +303,7 @@ def getAllTaggedPhotos(tagsList):
             WHERE t.tag_name IN ('{0}') 
             GROUP BY p.photo_id 
             HAVING COUNT(DISTINCT t.tag_name) = {1}'''.format(tagString, len(tagsList)))
-    # return a list of tuples, [(imgdata, pid, caption), ...]
+    # return a list of tuples, [(imgdata, photo_id, caption), ...]
     return cursor.fetchall()
 
 def getUserTaggedPhotos(user_id, tagsList):
@@ -316,8 +317,61 @@ def getUserTaggedPhotos(user_id, tagsList):
             WHERE p.user_id = '{0}' AND t.tag_name IN ('{1}') 
             GROUP BY p.photo_id 
             HAVING COUNT(DISTINCT t.tag_name) = {2}'''.format(user_id, tagString, len(tagsList)))
-    # return a list of tuples, [(imgdata, pid, caption), ...]
+    # return a list of tuples, [(imgdata, photo_id, caption), ...]
     return cursor.fetchall()
+
+def getOtherTaggedPhotos(user_id, tagsList):
+    tagString = "','".join(tagsList)
+
+    cursor = conn.cursor()
+    cursor.execute(
+        '''SELECT p.imgdata, p.photo_id, p.caption 
+            FROM Photo p 
+            JOIN Tag t ON p.photo_id = t.photo_id 
+            WHERE p.user_id <> '{0}' AND t.tag_name IN ('{1}') 
+            GROUP BY p.photo_id 
+            HAVING COUNT(DISTINCT t.tag_name) = {2}'''.format(user_id, tagString, len(tagsList)))
+    # return a list of tuples, [(imgdata, photo_id, caption), ...]
+    return cursor.fetchall()
+
+# START YOU MAY ALSO LIKE code
+@app.route('/discover', methods=['GET'])
+@flask_login.login_required
+def discover():
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
+    return render_template('discover.html', name=flask_login.current_user.id, photos=youMayAlsoLike(user_id), countLike=countLikes(), base64=base64)
+
+# returns a list of lists of tags as strings
+def powerset(tags):
+    return list([list(comb) for r in range(len(tags)+1, 0, -1) for comb in combinations(tags, r)])
+
+# returns a list of tags as strings
+def getTopUserTags(user_id):
+    cursor = conn.cursor()
+    cursor.execute(
+        '''SELECT tag_name 
+            FROM Tag 
+            JOIN Photo ON Tag.photo_id = Photo.photo_id
+            WHERE Photo.user_id = %s 
+            GROUP BY tag_name 
+            ORDER BY COUNT(tag_name) DESC LIMIT 3''', (user_id,))
+    return [tag[0] for tag in cursor.fetchall()]
+
+def youMayAlsoLike(user_id):
+    tags = getTopUserTags(user_id)
+    tags_powerset_list = powerset(tags) # (a,b,c) (a,b) (b,c) (a) (b) (c) ()
+    visited = set()
+    output = []
+    for tag_list in tags_powerset_list:
+        print(tag_list)
+        for photo_tuple in getOtherTaggedPhotos(user_id, tag_list):
+            if photo_tuple[1] not in visited:
+                print(photo_tuple[1])
+                visited.add(photo_tuple[1])
+                output.append(photo_tuple)
+    return output
+
+# END YOU MAY ALSO LIKE code
 # END tags code
 
 
@@ -401,7 +455,7 @@ def albumExists(a_name, user_id):
 
 @app.route('/albums', methods=['GET', 'POST'])
 @flask_login.login_required
-def create_album():
+def album():
     if request.method == 'POST':
         user_id = getUserIdFromEmail(flask_login.current_user.id)
         a_name = request.form.get('a_name')
@@ -564,6 +618,7 @@ def giveALike():
                            allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
                            userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
 
+
 def getAllUserWhoLiked():
     cursor = conn.cursor()
     cursor.execute(
@@ -571,6 +626,7 @@ def getAllUserWhoLiked():
         "FROM Users INNER JOIN Likes ON Users.user_id = Likes.user_id"
     )
     return cursor.fetchall()
+
 
 def countLikes():
     cursor = conn.cursor()
@@ -580,6 +636,7 @@ def countLikes():
         "GROUP BY Likes.photo_id"
     )
     return cursor.fetchall()
+
 
 # helper function: increase the value of the cell by 1 given
 #                   the table name, column name, and when row name = id
