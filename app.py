@@ -557,7 +557,6 @@ def browse():
 
 
 @app.route("/hello", methods=['POST'])
-# @flask_login.login_required
 def addComment():
     if flask_login.current_user.is_authenticated:
         user_id = getUserIdFromEmail(flask_login.current_user.id)
@@ -603,7 +602,7 @@ def getAllComment():
 
 
 @app.route("/photos", methods=['POST'])
-# does not need to be logged in
+@flask_login.login_required
 def giveALike():
     if flask_login.current_user.is_authenticated:
         user_id = getUserIdFromEmail(flask_login.current_user.id)
