@@ -132,18 +132,7 @@ def unauthorized_handler():
 
 @app.route("/register", methods=['GET'])
 def register():
-    return render_template('register.html', supress='True')
-
-
-@app.route("/photos", methods=['GET'])
-@flask_login.login_required
-def Photo():
-    user_id = getUserIdFromEmail(flask_login.current_user.id)
-    commentList = getAllComment()
-
-    return render_template('hello.html', message='These are your photos', 
-                            photos=getUsersPhotos(user_id), comments=commentList, 
-                            userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
+    return render_template('register.html', supress=True)
 
 
 @app.route("/register", methods=['POST'])
@@ -161,11 +150,10 @@ def register_user():
         print("couldn't find all tokens")
         return flask.redirect(flask.url_for('register'))
 
-    cursor = conn.cursor()
-    test = isEmailUnique(email)
-    if test:
-        print(cursor.execute(
-            "INSERT INTO Users (first_name, last_name, dob, email, password, hometown, gender) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(first_name, last_name, dob, email, password, hometown, gender)))
+    if isEmailUnique(email):
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO Users (first_name, last_name, dob, email, password, hometown, gender) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(first_name, last_name, dob, email, password, hometown, gender))
         conn.commit()
 
         # log user in
@@ -181,7 +169,18 @@ def register_user():
                                 topTen=getTopTenScore())
     else:
         print("couldn't find all tokens")
-        return flask.redirect(flask.url_for('register'))
+        return render_template('register.html', duplicate=False)
+    
+
+@app.route("/photos", methods=['GET'])
+@flask_login.login_required
+def Photo():
+    user_id = getUserIdFromEmail(flask_login.current_user.id)
+    commentList = getAllComment()
+
+    return render_template('hello.html', message='These are your photos', 
+                            photos=getUsersPhotos(user_id), comments=commentList, 
+                            userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
 
 
 def getUsersPhotos(user_id):
@@ -201,11 +200,12 @@ def getUserIdFromEmail(email):
 
 def isEmailUnique(email):
     # use this to check if a email has already been registered
-    cursor = conn.cursor()
-    if cursor.execute("SELECT email FROM Users WHERE email = '{0}'".format(email)):
-        # this means there are greater than zero entries with that email
-        return False
-    else:
+    try:
+        cursor = conn.cursor()
+        if cursor.execute("SELECT email FROM Users WHERE email = '{0}'".format(email)):
+            # this means there are greater than zero entries with that email
+            return False
+    except:
         return True
 # END login code
 
