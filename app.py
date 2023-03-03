@@ -362,14 +362,12 @@ def getTopUserTags(user_id):
 
 def youMayAlsoLike(user_id):
     tags = getTopUserTags(user_id)
-    tags_powerset_list = powerset(tags) # (a,b,c) (a,b) (b,c) (a) (b) (c) ()
+    tags_powerset_list = powerset(tags)
     visited = set()
     output = []
     for tag_list in tags_powerset_list:
-        print(tag_list)
         for photo_tuple in getOtherTaggedPhotos(user_id, tag_list):
             if photo_tuple[1] not in visited:
-                print(photo_tuple[1])
                 visited.add(photo_tuple[1])
                 output.append(photo_tuple)
     return output
