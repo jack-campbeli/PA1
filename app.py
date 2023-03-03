@@ -611,9 +611,6 @@ def giveALike():
     )
     conn.commit()
 
-    # increase the number of like by 1
-    increaseByOne(photo_id, 'photo', 'photo_id', 'likes')
-
     return render_template('hello.html', name=flask_login.current_user.id,
                            allphotos=getBrowsingPhotos(user_id), comments=getAllComment(), 
                            userLiked=getAllUserWhoLiked(), countLike=countLikes(), base64=base64)
@@ -658,7 +655,6 @@ def getTopTenScore():
     )
     return cursor.fetchall()
 
-# @app.route("/search", methods=['GET', 'POST'])
 def searchComment(text):
     cursor = conn.cursor()
     cursor.execute(
@@ -682,7 +678,8 @@ def hello():
             return flask.redirect(flask.url_for('hello'))
 
         if text == None:
-            return render_template('hello.html')
+            return render_template('hello.html', message='Welcome to Photoshare', 
+                                    topTen=getTopTenScore())
 
         return render_template('hello.html', message='Welcome to Photoshare', 
                                 topTen=getTopTenScore(), 
