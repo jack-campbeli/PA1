@@ -605,13 +605,13 @@ def getTopTenScore():
 def searchComment(text):
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT u.user_id, u.first_name, u.last_name "
-        "FROM Users u, (SELECT user_id, COUNT(text) "
+        "SELECT u.first_name, u.last_name, count.num "
+        "FROM Users u, (SELECT user_id, COUNT(text) as num "
             "FROM Comment c "
             "WHERE c.text = %s "     
-            "GROUP BY c.user_id "
-            "ORDER BY COUNT(text) desc) AS count "
-        "WHERE u.user_id = count.user_id ", (text)
+            "GROUP BY c.user_id) AS count "
+        "WHERE u.user_id = count.user_id "
+        "ORDER BY count.num desc ", (text)
     )
     return cursor.fetchall()
 

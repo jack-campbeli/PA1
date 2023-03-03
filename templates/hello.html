@@ -53,7 +53,7 @@
 {% if relatedC %}
   <h3> Related Comment: {{relatedC}} </h3>
   {% for oc in orderedComment %}
-    <li>ID: {{oc[0]}}: {{oc[1]}}, {{oc[2]}} <br>
+    <li>{{oc[0]}}, {{oc[1]}} ({{oc[2]}})<br>
   {% endfor %}
 {% endif %}
 
