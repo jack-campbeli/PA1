@@ -165,11 +165,10 @@ def register_user():
         user.hometown = hometown
         user.gender = gender
         flask_login.login_user(user)
-        return render_template('hello.html', name=email, message='Account Created!', 
-                                topTen=getTopTenScore())
+        return render_template('hello.html', name=email, message='Account Created!', topTen=getTopTenScore(), duplicate=False)
     else:
         print("couldn't find all tokens")
-        return render_template('register.html', duplicate=False)
+        return render_template('register.html', duplicate=True)
     
 
 @app.route("/photos", methods=['GET'])
@@ -200,13 +199,12 @@ def getUserIdFromEmail(email):
 
 def isEmailUnique(email):
     # use this to check if a email has already been registered
-    try:
-        cursor = conn.cursor()
-        if cursor.execute("SELECT email FROM Users WHERE email = '{0}'".format(email)):
-            # this means there are greater than zero entries with that email
+    cursor = conn.cursor()
+    cursor.execute("SELECT email FROM Users WHERE email = '{0}'".format(email))
+    # this means there are greater than zero entries with that email
+    if cursor.fetchone():
             return False
-    except:
-        return True
+    return True
 # END login code
 
 
