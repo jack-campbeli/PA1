@@ -22,19 +22,18 @@
         <!-- Displaying Discover Page Photos -->
         {% if photos %}
             {% for photo in photos %}
-                <li>User: {{photo[1]}}<br>
                 <li>Caption: {{photo[2]}}<br>
-                <li>Picture_ID: {{photo[3]}}<br> <!-- TESTING -->
+                <li>Picture_ID: {{photo[1]}}<br> <!-- TESTING -->
                 <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'
                     width="450" height=auto/></li>
 
 
                 <!-- Like -->
                 <form method="post" action="{{ url_for('giveALike') }}">
-                <input type="submit" name = "{{photo[3]}}" value="Like"/> 
+                <input type="submit" name = "{{photo[1]}}" value="Like"/> 
                 {% if countLike %}
                     {% for cl in countLike %}
-                    {% if cl[0] == photo[3] %}
+                    {% if cl[0] == photo[1] %}
                         {{cl[1]}}
                     {% endif %}
                     {% endfor %}
@@ -46,7 +45,7 @@
                 {% if userLiked %}
                 <ul>
                 {% for ul in userLiked %}
-                    {% if ul[3] == photo[3] %}
+                    {% if ul[3] == photo[1] %}
                     <li>ID {{ul[0]}}: {{ul[1]}}, {{ul[2]}}</li>
                     {% endif %}
                 {% endfor %}
@@ -58,7 +57,7 @@
                 <h3>Comment: </h3>
                 <form method="post" action="{{ url_for('addComment') }}">
                 <label for="comment">Enter your comment:</label>
-                <input type="comment" name="{{photo[3]}}"/><br />
+                <input type="comment" name="{{photo[1]}}"/><br />
                 
                 <input type="submit" value="Comment" name="like"/>
                 </form>
@@ -67,7 +66,7 @@
                 {% if comments %}
                 <ul>
                 {% for comment in comments %}
-                    {% if photo[3] == comment[2] %}
+                    {% if photo[1] == comment[2] %}
                     <li>UID: {{comment[1]}}<br>
                     <li>PID: {{comment[2]}}<br>
                     <li>Text: {{comment[4]}}<br>
