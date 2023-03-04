@@ -211,8 +211,7 @@ def isEmailUnique(email):
 @app.route('/profile')
 @flask_login.login_required
 def protected():
-    currID = getUserIdFromEmail(flask_login.current_user.id)
-    return render_template('hello.html', name=flask_login.current_user.id, id=currID,
+    return render_template('hello.html', name=flask_login.current_user.id, 
                             message="Here's your profile", topTen=getTopTenScore())
 
 
@@ -688,7 +687,6 @@ def searchComment(text):
 # default page
 @app.route("/", methods=['GET', 'POST'])
 def hello():
-    currID = getUserIdFromEmail(flask_login.current_user.id)
     try:
         text = request.form.get('search')
     except:
@@ -696,10 +694,10 @@ def hello():
         return flask.redirect(flask.url_for('hello'))
 
     if text == None:
-        return render_template('hello.html', message='Welcome to Photoshare', name=flask_login.current_user.id, id=currID,
+        return render_template('hello.html', message='Welcome to Photoshare', 
                                 topTen=getTopTenScore())
 
-    return render_template('hello.html', message='Welcome to Photoshare', name=flask_login.current_user.id, id=currID,
+    return render_template('hello.html', message='Welcome to Photoshare', 
                             topTen=getTopTenScore(), 
                             relatedC=text, orderedComment=searchComment(text))
 
