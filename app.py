@@ -167,8 +167,8 @@ def register_user():
         flask_login.login_user(user)
         return render_template('hello.html', name=email, message='Account Created!', topTen=getTopTenScore(), duplicate=False)
     else:
-        print("couldn't find all tokens")
-        return render_template('register.html', duplicate=True)
+        print("Duplicated Email")
+        return flask.redirect(flask.url_for('register', duplicate=True))
     
 
 @app.route("/photos", methods=['GET'])
@@ -211,7 +211,8 @@ def isEmailUnique(email):
 @app.route('/profile')
 @flask_login.login_required
 def protected():
-    return render_template('hello.html', name=flask_login.current_user.id, 
+    currID = getUserIdFromEmail(flask_login.current_user.id)
+    return render_template('hello.html', name=flask_login.current_user.id, id=currID,
                             message="Here's your profile", topTen=getTopTenScore())
 
 
@@ -687,6 +688,7 @@ def searchComment(text):
 # default page
 @app.route("/", methods=['GET', 'POST'])
 def hello():
+    currID = getUserIdFromEmail(flask_login.current_user.id)
     try:
         text = request.form.get('search')
     except:
@@ -694,10 +696,10 @@ def hello():
         return flask.redirect(flask.url_for('hello'))
 
     if text == None:
-        return render_template('hello.html', message='Welcome to Photoshare', 
+        return render_template('hello.html', message='Welcome to Photoshare', name=flask_login.current_user.id, id=currID,
                                 topTen=getTopTenScore())
 
-    return render_template('hello.html', message='Welcome to Photoshare', 
+    return render_template('hello.html', message='Welcome to Photoshare', name=flask_login.current_user.id, id=currID,
                             topTen=getTopTenScore(), 
                             relatedC=text, orderedComment=searchComment(text))
 
